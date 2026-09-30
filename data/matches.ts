@@ -1,9 +1,9 @@
 export type Match = {
   id: string;
   date: string; // YYYY-MM-DD
-  time: string; // HH:mm
+  time?: string; // HH:mm
   opponent: string;
-  location: string;
+  location?: string;
   home: boolean;
 };
 

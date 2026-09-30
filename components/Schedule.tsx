@@ -9,8 +9,8 @@ export default function Schedule({ matches }: { matches: Match[] }) {
   return (
     <section>
       <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={view === "calendar"} className={view === "calendar" ? "active" : ""} onClick={() => setView("calendar")}>Calendar</button>
-        <button role="tab" aria-selected={view === "tiles"} className={view === "tiles" ? "active" : ""} onClick={() => setView("tiles")}>Tiles</button>
+        <button role="tab" aria-selected={view === "calendar"} className={view === "calendar" ? "active" : ""} onClick={() => setView("calendar")}>Календар</button>
+        <button role="tab" aria-selected={view === "tiles"} className={view === "tiles" ? "active" : ""} onClick={() => setView("tiles")}>График</button>
       </div>
       {view === "calendar" ? <CalendarView matches={matches} /> : <TilesView matches={matches} />}
     </section>

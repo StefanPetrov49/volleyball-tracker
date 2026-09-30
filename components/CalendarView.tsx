@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import type { Match } from "@/data/matches";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function CalendarView({ matches }: { matches: Match[] }) {
@@ -35,7 +35,7 @@ export default function CalendarView({ matches }: { matches: Match[] }) {
     <div className="calendar">
       <div className="cal-head">
         <button onClick={() => shift(-1)} aria-label="Previous month">‹</button>
-        <h2>{new Date(year, month).toLocaleString("en", { month: "long", year: "numeric" })}</h2>
+        <h2>{new Date(year, month).toLocaleString("bg", { month: "long", year: "numeric" })}</h2>
         <button onClick={() => shift(1)} aria-label="Next month">›</button>
       </div>
       <div className="cal-grid">

@@ -23,17 +23,17 @@ export default function NextMatch({ matches }: { matches: Match[] }) {
 
   const diff = toDate(next).getTime() - now;
   const parts = [
-    ["days", Math.floor(diff / 86400000)],
-    ["hrs", Math.floor(diff / 3600000) % 24],
-    ["min", Math.floor(diff / 60000) % 60],
-    ["sec", Math.floor(diff / 1000) % 60],
+    ["дни", Math.floor(diff / 86400000)],
+    ["часове", Math.floor(diff / 3600000) % 24],
+    ["минути", Math.floor(diff / 60000) % 60],
+    ["секунди", Math.floor(diff / 1000) % 60],
   ] as const;
 
   return (
     <div className="next">
-      <p className="next-label">Next match</p>
+      <p className="next-label">Следващ мач</p>
       <h2>vs {next.opponent}</h2>
-      <p className="next-meta">{next.time} · {next.location} · {next.home ? "Home" : "Away"}</p>
+      <p className="next-meta">{next.time} · {next.location} · {next.home ? "Домакини" : "Гости"}</p>
       <div className="countdown">
         {parts.map(([label, value]) => (
           <div key={label} className="count-box">

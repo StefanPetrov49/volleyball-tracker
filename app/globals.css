@@ -206,3 +206,35 @@ body > main{flex:1}
   .insta-handle{display:none}
   .insta-btn{padding:8px}
 }
+
+/* ---------- Match Popup ---------- */
+.match-popup{
+  min-width:260px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-left:6px solid var(--orange);
+  border-radius:12px;
+  box-shadow:0 8px 24px #0002;
+  padding:14px 16px;
+  animation:rise .18s ease forwards;
+}
+.match-popup-header{
+  display:flex;gap:12px;align-items:center;margin-bottom:12px;
+}
+.match-popup-date-block{
+  min-width:52px;padding:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--charcoal);color:#fff;border-radius:8px;
+}
+.match-popup-month{text-transform:uppercase;font-size:.65rem;color:var(--blue)}
+.match-popup-day{font-size:1.4rem;font-weight:700}
+.match-popup-title{display:flex;flex-direction:column;gap:4px}
+.match-popup-title h4{margin:0;font-size:.95rem;font-weight:700;color:var(--charcoal)}
+.match-popup-divider{height:1px;background:var(--line);margin-bottom:10px}
+.match-popup-details{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-direction:column;gap:6px;
+  font-size:.82rem;color:var(--muted);
+}
+.match-popup-details li{display:flex;align-items:center;gap:6px}
+.match-popup-icon{font-size:.9rem}

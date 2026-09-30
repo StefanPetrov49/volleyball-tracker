@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import type { Match } from "@/data/matches";
+import CalendarEventWithPopup from "./CalendarEventWithPopup";
 
 const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -47,9 +48,7 @@ export default function CalendarView({ matches }: { matches: Match[] }) {
             <div key={i} className={`cal-cell ${day ? "" : "empty"} ${ms.length ? "has-match" : ""} ${key === todayKey ? "today" : ""}`}>
               {day && <span className="cal-day">{day}</span>}
               {ms.map((m) => (
-                <div key={m.id} className="cal-event" title={`${m.location}`}>
-                  {m.time} vs {m.opponent}
-                </div>
+                <CalendarEventWithPopup key={m.id} match={m} />
               ))}
             </div>
           );
@@ -58,3 +57,4 @@ export default function CalendarView({ matches }: { matches: Match[] }) {
     </div>
   );
 }
+

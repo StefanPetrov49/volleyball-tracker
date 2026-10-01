@@ -1,7 +1,9 @@
 import Schedule from "@/components/Schedule";
 import NextMatch from "@/components/NextMatch";
-import { matches } from "@/data/matches";
 import Footer from "@/components/Footer";
+import NavUser from "@/components/NavUser";
+import { readJson } from "@/lib/fileStore";
+import type { Match } from "@/data/matches";
 
 function InstagramIcon() {
   return (
@@ -15,6 +17,8 @@ function InstagramIcon() {
 }
 
 export default function Home() {
+  const matches = readJson<Match[]>("matches.json");
+
   return (
     <>
       <nav className="topbar">
@@ -22,16 +26,19 @@ export default function Home() {
           <a href="/" className="brand">
             <img src="/logo.svg" alt="Яките пичове logo" className="brand-logo" />
           </a>
-          <a
-            href="https://www.instagram.com/yakite.pichove/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="insta-btn"
-            aria-label="Instagram @yakite.pichove"
-          >
-            <InstagramIcon />
-            <span className="insta-handle">@yakite.pichove</span>
-          </a>
+          <div className="topbar-right">
+            <a
+              href="https://www.instagram.com/yakite.pichove/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="insta-btn"
+              aria-label="Instagram @yakite.pichove"
+            >
+              <InstagramIcon />
+              <span className="insta-handle">@yakite.pichove</span>
+            </a>
+            <NavUser />
+          </div>
         </div>
       </nav>
 

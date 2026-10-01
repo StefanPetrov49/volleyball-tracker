@@ -1,0 +1,53 @@
+[
+  {
+    "id": "6fac509f-a075-4b1a-af28-f9229cead09a",
+    "question": "Мач срещу Владо Волей(на антонио любовта)",
+    "options": [
+      {
+        "id": "6f8ae0f6-9113-4222-9ba8-20352782ae66",
+        "date": "2026-11-22",
+        "time": "",
+        "location": "",
+        "votes": 1
+      },
+      {
+        "id": "450d1574-2933-46a6-a865-f32962053116",
+        "date": "2026-11-29",
+        "time": "",
+        "location": "",
+        "votes": 0
+      }
+    ],
+    "createdAt": "2026-10-01T13:46:32.466Z",
+    "userVotes": {
+      "test": "6f8ae0f6-9113-4222-9ba8-20352782ae66"
+    },
+    "addedToCalendar": "6f8ae0f6-9113-4222-9ba8-20352782ae66"
+  },
+  {
+    "id": "dc2034fe-1800-4701-9cff-4fbaeac84d34",
+    "question": "Мач срещу Владо Волей",
+    "options": [
+      {
+        "id": "ac10bc45-401c-4f97-9414-95dfdf500000",
+        "date": "2026-10-06",
+        "time": "",
+        "location": "",
+        "votes": 2
+      },
+      {
+        "id": "4922b332-fb4e-455d-946b-30dd725ff3ea",
+        "date": "2026-10-07",
+        "time": "",
+        "location": "",
+        "votes": 0
+      }
+    ],
+    "createdAt": "2026-10-01T13:54:17.629Z",
+    "userVotes": {
+      "test": "ac10bc45-401c-4f97-9414-95dfdf500000",
+      "test2": "ac10bc45-401c-4f97-9414-95dfdf500000"
+    },
+    "addedToCalendar": "ac10bc45-401c-4f97-9414-95dfdf500000"
+  }
+]

@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
+import { AuthProvider } from "@/lib/AuthContext";
 
 const siteUrl = "https://volleyball-tracker-two.vercel.app";
 const title = "Яките пичове – волейболен отбор";
@@ -50,7 +51,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="bg">
-      <body>{children}</body>
+      <body><AuthProvider>{children}</AuthProvider></body>
     </html>
   );
 }

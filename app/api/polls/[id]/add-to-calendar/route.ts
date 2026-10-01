@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { polls } from "@/data/polls";
-import { matches } from "@/data/matches";
+import { readJson, writeJson } from "@/lib/fileStore";
+import type { Poll } from "@/data/polls";
 import type { Match } from "@/data/matches";
 
 export async function POST(
@@ -14,6 +14,7 @@ export async function POST(
     home: boolean;
   };
 
+  const polls = readJson<Poll[]>("polls.json");
   const poll = polls.find((p) => p.id === id);
   if (!poll) return NextResponse.json({ error: "Poll not found" }, { status: 404 });
 
@@ -29,8 +30,12 @@ export async function POST(
     home,
   };
 
+  const matches = readJson<Match[]>("matches.json");
   matches.push(match);
+  writeJson("matches.json", matches);
+
   poll.addedToCalendar = optionId;
+  writeJson("polls.json", polls);
 
   return NextResponse.json(match, { status: 201 });
 }

@@ -17,7 +17,7 @@ function InstagramIcon() {
 }
 
 export default function Home() {
-  const matches = readJson<Match[]>("matches.json");
+  const matches = readJson<Match[]>("matches.json", []);
 
   return (
     <>

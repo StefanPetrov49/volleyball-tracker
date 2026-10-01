@@ -9,7 +9,7 @@ export async function POST(
   const { id } = await params;
   const { optionId, username } = await req.json() as { optionId: string; username?: string };
 
-  const polls = readJson<Poll[]>("polls.json");
+  const polls = readJson<Poll[]>("polls.json", []);
   const poll = polls.find((p) => p.id === id);
   if (!poll) return NextResponse.json({ error: "Poll not found" }, { status: 404 });
 

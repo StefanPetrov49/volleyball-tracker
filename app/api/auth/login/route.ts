@@ -6,7 +6,7 @@ import type { Credential } from "@/data/credentials";
 export async function POST(req: Request) {
   const { username, password } = await req.json() as { username: string; password: string };
 
-  const credentials = readJson<Credential[]>("credentials.json");
+  const credentials = readJson<Credential[]>("credentials.json", []);
   const user = credentials.find((c) => c.username === username);
 
   if (!user || !verifyPassword(password, user.password)) {

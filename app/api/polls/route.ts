@@ -3,7 +3,7 @@ import { readJson, writeJson } from "@/lib/fileStore";
 import type { Poll, PollOption } from "@/data/polls";
 
 export async function GET() {
-  const polls = readJson<Poll[]>("polls.json");
+  const polls = readJson<Poll[]>("polls.json", []);
   return NextResponse.json(polls);
 }
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     createdAt: new Date().toISOString(),
   };
 
-  const polls = readJson<Poll[]>("polls.json");
+  const polls = readJson<Poll[]>("polls.json", []);
   polls.push(poll);
   writeJson("polls.json", polls);
 

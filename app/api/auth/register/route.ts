@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Потребителското име и паролата са задължителни" }, { status: 400 });
   }
 
-  const credentials = readJson<Credential[]>("credentials.json");
+  const credentials = readJson<Credential[]>("credentials.json", []);
   if (credentials.find((c) => c.username === username)) {
     return NextResponse.json({ error: "Потребителят вече съществува" }, { status: 409 });
   }

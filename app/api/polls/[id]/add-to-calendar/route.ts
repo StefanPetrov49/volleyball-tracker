@@ -14,7 +14,7 @@ export async function POST(
     home: boolean;
   };
 
-  const polls = readJson<Poll[]>("polls.json");
+  const polls = readJson<Poll[]>("polls.json", []);
   const poll = polls.find((p) => p.id === id);
   if (!poll) return NextResponse.json({ error: "Poll not found" }, { status: 404 });
 
@@ -30,7 +30,7 @@ export async function POST(
     home,
   };
 
-  const matches = readJson<Match[]>("matches.json");
+  const matches = readJson<Match[]>("matches.json", []);
   matches.push(match);
   writeJson("matches.json", matches);
 

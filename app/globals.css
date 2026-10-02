@@ -338,10 +338,20 @@ body > main{flex:1}
   transition:all .15s;
 }
 .poll-add-cal-btn:hover{background:var(--charcoal);color:#fff}
-.poll-add-cal-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.poll-add-cal-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}  
 .poll-add-cal-form input{
   padding:7px 12px;border:1px solid var(--line);border-radius:8px;
   font-size:.88rem;color:var(--charcoal);outline:none;flex:1;min-width:120px;
 }
 .poll-home-toggle{display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--charcoal);cursor:pointer;white-space:nowrap}
 .poll-added-note{margin:8px 0 0;font-size:.85rem;color:var(--muted)}
+
+
+.auth-card{max-width:400px;margin:48px auto;padding:28px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 8px #0001;display:grid;gap:14px}
+.auth-card h1{margin:0 0 4px;font-size:1.5rem}
+.auth-card label{display:grid;gap:6px;font-weight:600;font-size:.9rem}
+.auth-card input{padding:10px 12px;border:2px solid var(--line);border-radius:10px;font-size:1rem}
+.auth-card input:focus{outline:none;border-color:var(--blue)}
+.auth-card button{padding:12px;border:none;border-radius:999px;background:var(--orange);color:#fff;font-size:1rem;font-weight:700;cursor:pointer}
+.auth-card button:disabled{opacity:.6;cursor:wait}
+.auth-error{margin:0;color:#c0392b;font-weight:600}

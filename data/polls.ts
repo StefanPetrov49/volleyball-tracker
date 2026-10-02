@@ -11,7 +11,8 @@ export type Poll = {
   question: string;
   options: PollOption[];
   createdAt: string;
-  addedToCalendar?: string; // option id that was added
+  addedToCalendar?: string;
+  userVotes?: Record<string, string>; // username -> optionId
 };
 
 export const polls: Poll[] = [];

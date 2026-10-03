@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { Match } from "@/data/matches";
+import type { Match } from "@/types/match";
 import MatchPopup from "./MatchPopup";
 
 export default function CalendarEventWithPopup({ match }: { match: Match }) {
@@ -27,7 +27,7 @@ export default function CalendarEventWithPopup({ match }: { match: Match }) {
         onMouseEnter={show}
         onMouseLeave={hide}
       >
-        {match.time} vs {match.opponent}
+        {match.time ? `${match.time} ` : ""}vs {match.opponent}
       </div>
       {pos &&
         createPortal(

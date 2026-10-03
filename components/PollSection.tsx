@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import type { Poll } from "@/data/polls";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Poll } from "@/types/poll";
 import { useAuth } from "@/lib/AuthContext";
 
 const fmt = (date: string, time?: string) => {
@@ -9,7 +10,7 @@ const fmt = (date: string, time?: string) => {
   return time ? `${dateStr}, ${time}` : dateStr;
 };
 
-function CreatePollForm({ onCreated }: { onCreated: (poll: Poll) => void }) {
+function CreatePollForm({ onCreated }: { onCreated: () => void }) {
   const [question, setQuestion] = useState("Кога играем?");
   const [options, setOptions] = useState([
     { date: "", time: "", location: "" },
@@ -31,8 +32,8 @@ function CreatePollForm({ onCreated }: { onCreated: (poll: Poll) => void }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question, options: filled }),
     });
-    const poll = await res.json() as Poll;
-    onCreated(poll);
+    if (!res.ok) return;
+    onCreated();
     setQuestion("Кога играем?");
     setOptions([{ date: "", time: "", location: "" }, { date: "", time: "", location: "" }]);
   };
@@ -65,47 +66,48 @@ function CreatePollForm({ onCreated }: { onCreated: (poll: Poll) => void }) {
   );
 }
 
-function PollCard({ poll: initial, onMatchAdded }: { poll: Poll; onMatchAdded?: () => void }) {
-  const { username } = useAuth();
-  const [poll, setPoll] = useState(initial);
-  const [voted, setVoted] = useState<string | null>(
-    username && initial.userVotes ? (initial.userVotes[username] ?? null) : null
-  );
+function PollCard({
+  poll,
+  onChanged,
+  onMatchAdded,
+}: {
+  poll: Poll;
+  onChanged: () => void;
+  onMatchAdded?: () => void;
+}) {
+  const router = useRouter();
+  const { isAdmin } = useAuth();
   const [adding, setAdding] = useState(false);
   const [opponent, setOpponent] = useState("");
   const [home, setHome] = useState(true);
 
+  const voted = poll.myVote;
   const totalVotes = poll.options.reduce((s, o) => s + o.votes, 0);
   const winner = poll.options.reduce((a, b) => (a.votes >= b.votes ? a : b));
 
   const vote = async (optionId: string) => {
-    if (optionId === voted) return; // clicking the same option does nothing
+    if (optionId === voted) return;
     const res = await fetch(`/api/polls/${poll.id}/vote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ optionId, username }),
+      body: JSON.stringify({ optionId }),
     });
-    const updated = await res.json() as Poll;
-    setPoll(updated);
-    setVoted(optionId);
+    if (res.ok) onChanged();
   };
 
   const addToCalendar = async () => {
     if (!opponent.trim()) return;
-    await fetch(`/api/polls/${poll.id}/add-to-calendar`, {
+    const res = await fetch(`/api/polls/${poll.id}/add-to-calendar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ optionId: winner.id, opponent, home }),
     });
-    setPoll((p) => ({ ...p, addedToCalendar: winner.id }));
+    if (!res.ok) return;
     setAdding(false);
+    onChanged();
     onMatchAdded?.();
+    router.refresh();
   };
-
-  const votersFor = (optionId: string): string[] =>
-    Object.entries(poll.userVotes ?? {})
-      .filter(([, oid]) => oid === optionId)
-      .map(([u]) => u);
 
   return (
     <div className={`poll-card ${poll.addedToCalendar ? "poll-card-done" : ""}`}>
@@ -114,7 +116,6 @@ function PollCard({ poll: initial, onMatchAdded }: { poll: Poll; onMatchAdded?: 
         {poll.options.map((o) => {
           const pct = totalVotes ? Math.round((o.votes / totalVotes) * 100) : 0;
           const isWinner = voted && o.id === winner.id;
-          const voters = votersFor(o.id);
           return (
             <button
               key={o.id}
@@ -123,25 +124,23 @@ function PollCard({ poll: initial, onMatchAdded }: { poll: Poll; onMatchAdded?: 
               disabled={!!poll.addedToCalendar}
             >
               <div className="poll-vote-label">
-                <span>{fmt(o.date, o.time)}</span>
+                <span>{fmt(o.date, o.time ?? undefined)}</span>
                 {o.location && <span className="poll-vote-location">📍 {o.location}</span>}
-                {voters.length > 0 && (
-                  <span className="poll-voters">👤 {voters.join(", ")}</span>
+                {o.voters.length > 0 && (
+                  <span className="poll-voters">👤 {o.voters.join(", ")}</span>
                 )}
               </div>
               <div className="poll-vote-right">
                 {voted && <span className="poll-pct">{pct}%</span>}
                 <span className="poll-count">{o.votes} гласа</span>
               </div>
-              {voted && (
-                <div className="poll-bar" style={{ width: `${pct}%` }} />
-              )}
+              {voted && <div className="poll-bar" style={{ width: `${pct}%` }} />}
             </button>
           );
         })}
       </div>
 
-      {voted && !poll.addedToCalendar && (
+      {isAdmin && totalVotes > 0 && !poll.addedToCalendar && (
         <div className="poll-winner-actions">
           {!adding ? (
             <button className="poll-add-cal-btn" onClick={() => setAdding(true)}>
@@ -149,11 +148,7 @@ function PollCard({ poll: initial, onMatchAdded }: { poll: Poll; onMatchAdded?: 
             </button>
           ) : (
             <div className="poll-add-cal-form">
-              <input
-                placeholder="Противник"
-                value={opponent}
-                onChange={(e) => setOpponent(e.target.value)}
-              />
+              <input placeholder="Противник" value={opponent} onChange={(e) => setOpponent(e.target.value)} />
               <label className="poll-home-toggle">
                 <input type="checkbox" checked={home} onChange={(e) => setHome(e.target.checked)} />
                 Домакини
@@ -165,28 +160,43 @@ function PollCard({ poll: initial, onMatchAdded }: { poll: Poll; onMatchAdded?: 
         </div>
       )}
 
-      {poll.addedToCalendar && (
-        <p className="poll-added-note">✅ Добавено в календара</p>
-      )}
+      {poll.addedToCalendar && <p className="poll-added-note">✅ Добавено в календара</p>}
     </div>
   );
 }
 
 export default function PollSection({ onMatchAdded }: { onMatchAdded?: () => void }) {
+  const { userId, isPending } = useAuth();
   const [polls, setPolls] = useState<Poll[]>([]);
 
-  useEffect(() => {
-    fetch("/api/polls").then((r) => r.json()).then(setPolls);
+  const load = useCallback(async () => {
+    const res = await fetch("/api/polls");
+    if (res.ok) setPolls(await res.json());
   }, []);
 
-  const onCreated = (poll: Poll) => setPolls((prev) => [poll, ...prev]);
+  useEffect(() => {
+    if (userId) load();
+    else setPolls([]);
+  }, [userId, load]);
+
+  if (isPending) return null;
+
+  if (!userId) {
+    return (
+      <section className="poll-section">
+        <p>Влез в профила си, за да виждаш анкетите и да гласуваш.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="poll-section">
-      <CreatePollForm onCreated={onCreated} />
+      <CreatePollForm onCreated={load} />
       {polls.length > 0 && (
         <div className="poll-cards">
-          {polls.map((p) => <PollCard key={p.id} poll={p} onMatchAdded={onMatchAdded} />)}
+          {polls.map((p) => (
+            <PollCard key={p.id} poll={p} onChanged={load} onMatchAdded={onMatchAdded} />
+          ))}
         </div>
       )}
     </section>

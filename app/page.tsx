@@ -2,8 +2,9 @@ import Schedule from "@/components/Schedule";
 import NextMatch from "@/components/NextMatch";
 import Footer from "@/components/Footer";
 import NavUser from "@/components/NavUser";
-import { readJson } from "@/lib/fileStore";
-import type { Match } from "@/data/matches";
+import { getMatches } from "@/lib/services/matches";
+
+export const dynamic = "force-dynamic";
 
 function InstagramIcon() {
   return (
@@ -16,8 +17,8 @@ function InstagramIcon() {
   );
 }
 
-export default function Home() {
-  const matches = readJson<Match[]>("matches.json", []);
+export default async function Home() {
+  const matches = await getMatches();
 
   return (
     <>

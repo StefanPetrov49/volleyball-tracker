@@ -1,4 +1,4 @@
-import type { Match } from "@/data/matches";
+import type { Match } from "@/types/match";
 
 type Props = { match: Match };
 

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import type { Match } from "@/data/matches";
+import type { Match } from "@/types/match";
 import CalendarView from "./CalendarView";
 import TilesView from "./TilesView";
 import PollSection from "./PollSection";

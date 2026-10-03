@@ -1,67 +1,35 @@
 "use client";
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-
-type AuthContextType = {
-  username: string | null;
-  login: (username: string, password: string) => Promise<string | null>;
-  register: (username: string, password: string) => Promise<string | null>;
-  logout: () => void;
-};
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "./auth-client";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [username, setUsername] = useState<string | null>(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("vt_user");
-    if (stored) setUsername(stored);
-  }, []);
-
-  const login = async (username: string, password: string): Promise<string | null> => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    if (!res.ok) {
-      const { error } = await res.json() as { error: string };
-      return error;
-    }
-    localStorage.setItem("vt_user", username);
-    setUsername(username);
-    return null;
-  };
-
-  const register = async (username: string, password: string): Promise<string | null> => {
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    if (!res.ok) {
-      const { error } = await res.json() as { error: string };
-      return error;
-    }
-    localStorage.setItem("vt_user", username);
-    setUsername(username);
-    return null;
-  };
-
-  const logout = () => {
-    localStorage.removeItem("vt_user");
-    setUsername(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ username, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
-  return ctx;
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const login = async (email: string, password: string): Promise<string | null> => {
+    const { error } = await authClient.signIn.email({ email, password });
+    if (error) return "Грешен имейл или парола";
+    router.refresh();
+    return null;
+  };
+
+  const logout = async () => {
+    await authClient.signOut();
+    router.refresh();
+  };
+
+  return {
+    isPending,
+    userId: session?.user.id ?? null,
+    username: session?.user.name ?? null,
+    isAdmin: session?.user.role === "admin",
+    mustChangePassword: !!session?.user.mustChangePassword,
+    login,
+    logout,
+  };
 }

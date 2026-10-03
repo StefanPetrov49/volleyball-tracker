@@ -1,40 +1,24 @@
 import { NextResponse } from "next/server";
-import { readJson, writeJson } from "@/lib/fileStore";
-import type { Poll } from "@/data/polls";
+import { z } from "zod";
+import { getApiUser } from "@/lib/session";
+import { castVote } from "@/lib/services/polls";
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+const body = z.object({ optionId: z.string().uuid() });
+
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getApiUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
-  const { optionId, username } = await req.json() as { optionId: string; username?: string };
-
-  const polls = readJson<Poll[]>("polls.json", []);
-  const poll = polls.find((p) => p.id === id);
-  if (!poll) return NextResponse.json({ error: "Poll not found" }, { status: 404 });
-
-  const option = poll.options.find((o) => o.id === optionId);
-  if (!option) return NextResponse.json({ error: "Option not found" }, { status: 404 });
-
-  if (!poll.userVotes) poll.userVotes = {};
-
-  // If user already voted for a different option, remove that vote first
-  const previousOptionId = username ? poll.userVotes[username] : undefined;
-  if (previousOptionId && previousOptionId !== optionId) {
-    const prev = poll.options.find((o) => o.id === previousOptionId);
-    if (prev) prev.votes = Math.max(0, prev.votes - 1);
+  const parsedId = z.string().uuid().safeParse(id);
+  const parsed = body.safeParse(await req.json().catch(() => null));
+  if (!parsedId.success || !parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  // Only increment if switching to a new option (not re-clicking the same one)
-  if (!previousOptionId || previousOptionId !== optionId) {
-    option.votes += 1;
+  const res = await castVote(user.id, parsedId.data, parsed.data.optionId);
+  if ("error" in res) {
+    return NextResponse.json({ error: res.error }, { status: res.error === "closed" ? 409 : 404 });
   }
-
-  if (username) {
-    poll.userVotes[username] = optionId;
-  }
-
-  writeJson("polls.json", polls);
-  return NextResponse.json(poll);
+  return NextResponse.json({ ok: true });
 }
-

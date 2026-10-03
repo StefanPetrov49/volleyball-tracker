@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import type { Match } from "@/data/matches";
+import type { Match } from "@/types/match";
 import CalendarEventWithPopup from "./CalendarEventWithPopup";
 
 const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];

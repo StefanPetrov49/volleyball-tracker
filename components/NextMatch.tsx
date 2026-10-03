@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { Match } from "@/data/matches";
+import type { Match } from "@/types/match";
 
-const toDate = (m: Match) => new Date(`${m.date}T${m.time}`);
+const toDate = (m: Match) => new Date(`${m.date}T${m.time?.trim() || "23:59"}`);
 
 export default function NextMatch({ matches }: { matches: Match[] }) {
   const [now, setNow] = useState<number | null>(null);

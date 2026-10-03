@@ -18,3 +18,9 @@ export async function requireAdmin() {
   if (session.user.role !== "admin") redirect("/");
   return session;
 }
+
+export async function getApiUser() {
+  const session = await getSession();
+  if (!session || session.user.mustChangePassword) return null;
+  return session.user;
+}

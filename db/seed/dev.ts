@@ -20,13 +20,12 @@ async function main() {
 
   const [poll] = await db
     .insert(polls)
-    .values({ question: "Кой идва на тренировка в сряда?" })
+    .values({ question: "Кога играем?" })
     .returning();
 
   await db.insert(pollOptions).values([
-    { pollId: poll.id, label: "Идвам", position: 0 },
-    { pollId: poll.id, label: "Не мога", position: 1 },
-    { pollId: poll.id, label: "Може би", position: 2 },
+    { pollId: poll.id, date: "2026-10-25", time: "18:00", location: null },
+    { pollId: poll.id, date: "2026-10-26", time: "19:00", location: "Универсиада" },
   ]);
 
   console.log("Dev data seeded.");

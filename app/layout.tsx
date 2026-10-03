@@ -26,14 +26,7 @@ export const metadata: Metadata = {
     title,
     description,
     locale: "bg_BG",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Яките пичове – лого",
-      },
-    ],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Яките пичове – лого" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -51,7 +44,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="bg">
-      <body><AuthProvider>{children}</AuthProvider></body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

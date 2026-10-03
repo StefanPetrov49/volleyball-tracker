@@ -6,17 +6,15 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { user } from "@/db/schema";
 
-const input = z
-  .object({
-    currentPassword: z.string().min(1),
-    newPassword: z.string().min(10).max(128),
-  })
-  .refine((v) => v.currentPassword !== v.newPassword);
+const input = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(5),
+});
 
 export async function changePasswordAction(currentPassword: string, newPassword: string) {
   const parsed = input.safeParse({ currentPassword, newPassword });
   if (!parsed.success) {
-    return { error: "Новата парола трябва да е поне 10 символа и различна от текущата." };
+    return { error: "Новата парола трябва да е поне 5 символа." };
   }
 
   const h = await headers();

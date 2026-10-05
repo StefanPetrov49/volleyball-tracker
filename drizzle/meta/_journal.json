@@ -29,6 +29,20 @@
       "when": 1791217229160,
       "tag": "0003_giant_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791223622997,
+      "tag": "0004_blue_overlord",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791223922878,
+      "tag": "0005_skinny_phil_sheldon",
+      "breakpoints": true
     }
   ]
 }

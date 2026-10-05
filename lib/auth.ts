@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { nextCookies } from "better-auth/next-js";
-import { admin } from "better-auth/plugins";
+import { admin, username } from "better-auth/plugins";
 import { db } from "./db";
 import { user } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -26,7 +26,14 @@ export const auth = betterAuth({
             },
         },
     },
-    plugins: [admin(), nextCookies()],
+    plugins: [
+        admin(),
+        username({
+            minUsernameLength: 3,
+            maxUsernameLength: 30,
+        }),
+        nextCookies(),
+    ],
     onPasswordReset: async (ctx: { user: { id: string } }) => {
         const { user: u } = ctx;
         await db.update(user).set({ mustChangePassword: true }).where(eq(user.id, u.id));

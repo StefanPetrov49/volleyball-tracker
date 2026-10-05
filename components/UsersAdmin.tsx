@@ -8,6 +8,7 @@ type User = {
     username?: string | null;
     email: string;
     role: string | null;
+    mustChangePassword: boolean;
 };
 
 function generatePassword() {
@@ -38,7 +39,10 @@ export default function UsersAdmin() {
             }
             setUsers(
                 data.users.map((u) => {
-                    const maybeUsername = u as typeof u & { username?: unknown };
+                    const extraUserFields = u as typeof u & {
+                        username?: unknown;
+                        mustChangePassword?: unknown;
+                    };
 
                     return {
                         id: u.id,
@@ -46,9 +50,11 @@ export default function UsersAdmin() {
                         email: u.email,
                         role: u.role ?? null,
                         username:
-                            typeof maybeUsername.username === "string"
-                                ? maybeUsername.username
+                            typeof extraUserFields.username === "string"
+                                ? extraUserFields.username
                                 : null,
+                        mustChangePassword:
+                            extraUserFields.mustChangePassword === true,
                     };
                 }),
             );
@@ -61,13 +67,29 @@ export default function UsersAdmin() {
 
     const reset = async (u: User) => {
         const password = generatePassword();
+
         setResetting({ userId: u.id, email: u.email, password });
-        const { error } = await authClient.admin.setUserPassword({ userId: u.id, newPassword: password });
+
+        const { error } = await authClient.admin.setUserPassword({
+            userId: u.id,
+            newPassword: password,
+        });
+
         setResetting(null);
+
         if (error) {
             setError(error.message ?? "Неуспешна смяна на паролата.");
             return;
         }
+
+        setUsers((currentUsers) =>
+            currentUsers.map((user) =>
+                user.id === u.id
+                    ? { ...user, mustChangePassword: true }
+                    : user,
+            ),
+        );
+
         setResult({ email: u.email, password });
     };
 
@@ -87,6 +109,7 @@ export default function UsersAdmin() {
                             <th>Име</th>
                             <th>Потребителско име</th>
                             <th>Роля</th>
+                            <th>Активен</th>
                             <th>Действие</th>
                         </tr>
                     </thead>
@@ -96,6 +119,7 @@ export default function UsersAdmin() {
                                 <td>{u.name}</td>
                                 <td>{u.username ?? "—"}</td>
                                 <td>{u.role === "admin" ? "админ" : "потребител"}</td>
+                                <td>{u.mustChangePassword ? "❌" : "✅"}</td>
                                 <td>
                                     <button
                                         className="poll-add-option-btn"

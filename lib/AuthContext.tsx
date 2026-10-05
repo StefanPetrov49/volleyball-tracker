@@ -11,12 +11,17 @@ export function useAuth() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
-  const login = async (email: string, password: string): Promise<string | null> => {
-    const { error } = await authClient.signIn.email({ email, password });
-    if (error) return "Грешен имейл или парола";
-    router.refresh();
-    return null;
-  };
+  const login = async (username: string, password: string): Promise<string | null> => {
+  const { error } = await authClient.signIn.username({
+    username: username.trim().toLowerCase(),
+    password,
+  });
+
+  if (error) return "Грешно потребителско име или парола.";
+
+  router.refresh();
+  return null;
+};
 
   const logout = async () => {
     await authClient.signOut();

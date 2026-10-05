@@ -5,6 +5,4 @@ export type Match = {
   opponent: string;
   location: string | null;
   home: boolean;
-  scoreUs: number | null;
-  scoreThem: number | null;
 };

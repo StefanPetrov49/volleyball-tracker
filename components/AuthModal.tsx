@@ -24,9 +24,6 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
     <div className="auth-overlay" onClick={onClose}>
       <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
         <button className="auth-close" onClick={onClose} aria-label="Затвори">✕</button>
-        <div className="auth-tabs">
-          <button type="button" className="active">Вход</button>
-        </div>
         <form className="auth-form" onSubmit={submit}>
           <div className="auth-field">
             <label>Имейл</label>

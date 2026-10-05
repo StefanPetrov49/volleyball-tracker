@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiUser } from "@/lib/session";
-import { castVote } from "@/lib/services/polls";
+import { toggleVote } from "@/lib/services/polls";
 
 const body = z.object({ optionId: z.string().uuid() });
 
@@ -16,9 +16,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const res = await castVote(user.id, parsedId.data, parsed.data.optionId);
+  const res = await toggleVote(user.id, parsedId.data, parsed.data.optionId);
   if ("error" in res) {
-    return NextResponse.json({ error: res.error }, { status: res.error === "closed" ? 409 : 404 });
+    return NextResponse.json({ error: res.error }, { status: 404 });
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, voted: res.voted });
 }

@@ -44,7 +44,6 @@ body > main{flex:1}
   height:110px;width:auto;margin:-22px 0;
   object-fit:contain;
   transform-origin:bottom center;
-  animation:jump 1.4s ease-in-out infinite;
 }
 .insta-btn{
   display:inline-flex;align-items:center;gap:8px;
@@ -433,3 +432,21 @@ body > main{flex:1}
   background:transparent;color:var(--muted);cursor:pointer;
 }
 .pw-field .pw-toggle:hover{color:var(--charcoal);background:var(--blue-soft)}
+
+.nav-user{position:relative}
+.nav-username{background:none;border:0;font:inherit;color:inherit;cursor:pointer}
+.nav-menu{
+  position:absolute;right:0;top:calc(100% + 8px);min-width:180px;
+  background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;z-index:50;
+  display:flex;flex-direction:column;
+}
+.nav-menu-item{
+  display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:8px;
+  background:none;font:inherit;color:inherit;cursor:pointer;text-decoration:none;
+}
+.nav-menu-item:hover{background:rgba(245,94,30,.1)}
+.users-table{width:100%;border-collapse:collapse;margin-top:12px}
+.users-table th,.users-table td{border:1px solid rgba(0,0,0,.12);padding:8px 10px;text-align:left}
+.users-table th{background:rgba(245,94,30,.08);font-weight:600}
+.users-table tr:nth-child(even){background:rgba(0,0,0,.02)}

@@ -1,7 +1,6 @@
 import {
   boolean,
   date,
-  integer,
   pgTable,
   text,
   time,
@@ -20,18 +19,13 @@ export const matches = pgTable("matches", {
   opponent: text("opponent").notNull(),
   location: text("location"),
   home: boolean("home").notNull().default(true),
-  scoreUs: integer("score_us"),
-  scoreThem: integer("score_them"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const polls = pgTable("polls", {
   id: uuid("id").primaryKey().defaultRandom(),
   question: text("question").notNull(),
   createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
-  matchId: uuid("match_id").references(() => matches.id, { onDelete: "set null" }),
-  addedOptionId: uuid("added_option_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -60,5 +54,5 @@ export const votes = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [unique("votes_poll_user_unique").on(t.pollId, t.userId)]
+  (t) => [unique("votes_option_user_unique").on(t.optionId, t.userId)]
 );

@@ -2,6 +2,8 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/lib/AuthContext";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const siteUrl = "https://volleyball-tracker-two.vercel.app";
 const title = "Яките пичове – волейболен отбор";
@@ -45,7 +47,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="bg">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

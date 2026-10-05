@@ -11,7 +11,7 @@ export type Poll = {
   id: string;
   question: string;
   createdAt: string;
+  myVotes: string[];
+  notVoted: string[];
   options: PollOption[];
-  myVote: string | null;
-  addedToCalendar: string | null;
 };

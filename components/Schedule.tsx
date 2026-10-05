@@ -30,7 +30,7 @@ export default function Schedule({ matches: initial }: { matches: Match[] }) {
       </div>
       {view === "calendar" && <CalendarView matches={matches} />}
       {view === "tiles" && <TilesView matches={matches} />}
-      {view === "polls" && <PollSection onMatchAdded={refreshMatches} />}
+      {view === "polls" && <PollSection/>}
     </section>
   );
 }

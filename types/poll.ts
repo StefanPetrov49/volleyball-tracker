@@ -10,6 +10,7 @@ export type PollOption = {
 export type Poll = {
   id: string;
   question: string;
+  createdBy: string | null;
   createdAt: string;
   myVotes: string[];
   notVoted: string[];

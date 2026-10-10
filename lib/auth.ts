@@ -8,15 +8,18 @@ import { eq } from "drizzle-orm";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, { provider: "pg" }),
+
     emailAndPassword: {
         enabled: true,
         disableSignUp: true,
         minPasswordLength: 5,
     },
+
     session: {
         expiresIn: 60 * 60 * 24 * 365,
         updateAge: 60 * 60 * 24 * 7,
     },
+
     user: {
         additionalFields: {
             mustChangePassword: {
@@ -26,6 +29,7 @@ export const auth = betterAuth({
             },
         },
     },
+
     plugins: [
         admin(),
         username({
@@ -34,8 +38,11 @@ export const auth = betterAuth({
         }),
         nextCookies(),
     ],
+
     onPasswordReset: async (ctx: { user: { id: string } }) => {
-        const { user: u } = ctx;
-        await db.update(user).set({ mustChangePassword: true }).where(eq(user.id, u.id));
+        await db
+            .update(user)
+            .set({ mustChangePassword: true })
+            .where(eq(user.id, ctx.user.id));
     },
 });

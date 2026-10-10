@@ -14,7 +14,8 @@
     "db:studio": "drizzle-kit studio",
     "seed:dev": "tsx db/seed/dev.ts",
     "seed:prod": "tsx db/seed/prod.ts",
-    "user:create": "tsx scripts/create-user.ts"
+    "user:create": "tsx scripts/create-user.ts",
+    "seed:teams": "dotenv -e .env.local -- tsx db/seed/teams.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.7",
@@ -33,6 +34,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^18.0.5",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",

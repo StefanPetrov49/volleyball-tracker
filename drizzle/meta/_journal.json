@@ -43,6 +43,20 @@
       "when": 1791223922878,
       "tag": "0005_skinny_phil_sheldon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791589631288,
+      "tag": "0006_loud_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791594095563,
+      "tag": "0007_sweet_leo",
+      "breakpoints": true
     }
   ]
 }

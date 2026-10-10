@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import type { Match } from "@/types/match";
 import CalendarView from "./CalendarView";
@@ -27,10 +28,13 @@ export default function Schedule({ matches: initial }: { matches: Match[] }) {
         <button role="tab" aria-selected={view === "calendar"} className={view === "calendar" ? "active" : ""} onClick={() => setView("calendar")}>Календар</button>
         <button role="tab" aria-selected={view === "tiles"} className={view === "tiles" ? "active" : ""} onClick={() => setView("tiles")}>График</button>
         <button role="tab" aria-selected={view === "polls"} className={view === "polls" ? "active" : ""} onClick={() => setView("polls")}>Анкети</button>
+        <Link href="/results" className="tab-link">
+          Резултати
+        </Link>
       </div>
       {view === "calendar" && <CalendarView matches={matches} />}
       {view === "tiles" && <TilesView matches={matches} />}
-      {view === "polls" && <PollSection/>}
+      {view === "polls" && <PollSection />}
     </section>
   );
 }

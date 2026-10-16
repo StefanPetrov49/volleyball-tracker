@@ -14,6 +14,13 @@ export default async function ResultsPage() {
 
   const isAdmin = session?.user.role === "admin";
 
+  const active = results.filter(
+    (r) => r.status === "live" || r.status === "upcoming",
+  );
+  const past = results.filter(
+    (r) => r.status !== "live" && r.status !== "upcoming",
+  );
+
   return (
     <PageLayout>
       <header className="results-heading">
@@ -23,7 +30,7 @@ export default async function ResultsPage() {
 
         {isAdmin && (
           <Link href="/results/new" className="results-add-button">
-            + Нов резултат
+            + Нов мач
           </Link>
         )}
       </header>
@@ -31,15 +38,33 @@ export default async function ResultsPage() {
       {results.length === 0 ? (
         <div className="results-empty">
           <span className="results-empty-icon" aria-hidden="true">🏐</span>
-          <h2>Все още няма добавени резултати</h2>
-          <p>След като изиграете мач, неговият резултат ще се появи тук.</p>
+          <h2>Все още няма добавени мачове</h2>
+          <p>Предстоящите и изиграните мачове ще се показват тук.</p>
         </div>
       ) : (
-        <div className="results-grid">
-          {results.map((result) => (
-            <MatchResultCard key={result.id} result={result} />
-          ))}
-        </div>
+        <>
+          {active.length > 0 && (
+            <div className="results-grid">
+              {active.map((result) => (
+                <MatchResultCard key={result.id} result={result} />
+              ))}
+            </div>
+          )}
+
+          {active.length > 0 && past.length > 0 && (
+            <div className="results-divider" role="separator">
+              <span>Изиграни мачове</span>
+            </div>
+          )}
+
+          {past.length > 0 && (
+            <div className="results-grid">
+              {past.map((result) => (
+                <MatchResultCard key={result.id} result={result} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </PageLayout>
   );

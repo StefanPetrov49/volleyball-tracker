@@ -1,24 +1,40 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createMatchResult, type ResultFormState } from "./actions";
 import type { Team } from "@/lib/teams";
+import type { ResultFormState } from "@/lib/result-input";
 
-const initialState: ResultFormState = {};
 const SET_COUNT = 5;
 
 type SetInput = { a: string; b: string };
 
-export default function ResultForm({ teams }: { teams: Team[] }) {
-  const [state, formAction, pending] = useActionState(
-    createMatchResult,
-    initialState,
-  );
+export type ResultFormInitial = {
+  teamAId: string;
+  teamBId: string;
+  playedAt: string;
+  videoUrl: string;
+  sets: SetInput[];
+};
 
-  const [teamAId, setTeamAId] = useState("");
-  const [teamBId, setTeamBId] = useState("");
+type Props = {
+  teams: Team[];
+  action: (
+    prevState: ResultFormState,
+    formData: FormData,
+  ) => Promise<ResultFormState>;
+  initial: ResultFormInitial;
+  submitLabel: string;
+};
+
+export default function ResultForm({ teams, action, initial, submitLabel }: Props) {
+  const [state, formAction, pending] = useActionState(action, {});
+
+  const [teamAId, setTeamAId] = useState(initial.teamAId);
+  const [teamBId, setTeamBId] = useState(initial.teamBId);
+  const [playedAt, setPlayedAt] = useState(initial.playedAt);
+  const [videoUrl, setVideoUrl] = useState(initial.videoUrl);
   const [sets, setSets] = useState<SetInput[]>(
-    Array.from({ length: SET_COUNT }, () => ({ a: "", b: "" })),
+    Array.from({ length: SET_COUNT }, (_, i) => initial.sets[i] ?? { a: "", b: "" }),
   );
 
   const nameOf = (id: string) =>
@@ -85,8 +101,46 @@ export default function ResultForm({ teams }: { teams: Team[] }) {
 
       <section className="result-step">
         <h2 className="result-step-title">
-          <span className="result-step-num">2</span> Резултати по сетове
+          <span className="result-step-num">2</span> Дата и видео
         </h2>
+
+        <label className="result-field">
+          <span>Начало на мача (час в България)</span>
+          <input
+            name="playedAt"
+            type="datetime-local"
+            value={playedAt}
+            onChange={(e) => setPlayedAt(e.target.value)}
+            required
+          />
+        </label>
+
+        <label className="result-field">
+          <span>YouTube линк <small>(по желание)</small></span>
+          <input
+            name="videoUrl"
+            type="url"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+          <small className="result-hint">
+            Може да е линкът на планираното предаване. Мачът ще се показва „На
+            живо“, след като започне, докато не въведеш резултат.
+          </small>
+        </label>
+      </section>
+
+      <section className="result-step">
+        <h2 className="result-step-title">
+          <span className="result-step-num">3</span> Резултат
+          <small className="result-step-optional">по желание</small>
+        </h2>
+
+        <p className="result-hint">
+          Остави сетовете празни, ако мачът още не е изигран. Можеш да ги
+          попълниш по-късно от страницата на мача.
+        </p>
 
         <div className="result-sets-table">
           <div className="result-sets-head">
@@ -140,31 +194,8 @@ export default function ResultForm({ teams }: { teams: Team[] }) {
 
         <div className="result-preview">
           <span>Краен резултат</span>
-          <strong>{wonA} - {wonB}</strong>
+          <strong>{played.length > 0 ? `${wonA} - ${wonB}` : "Предстои"}</strong>
         </div>
-      </section>
-
-      <section className="result-step">
-        <h2 className="result-step-title">
-          <span className="result-step-num">3</span> Дата и видео
-        </h2>
-
-        <label className="result-field">
-          <span>Дата и час на мача</span>
-          <input name="playedAt" type="datetime-local" />
-        </label>
-
-        <label className="result-field">
-          <span>YouTube линк <small>(по желание)</small></span>
-          <input
-            name="videoUrl"
-            type="url"
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-          <small className="result-hint">
-            Копирай линка от YouTube както си е, ще го преобразуваме автоматично.
-          </small>
-        </label>
       </section>
 
       {state.error && (
@@ -172,7 +203,7 @@ export default function ResultForm({ teams }: { teams: Team[] }) {
       )}
 
       <button type="submit" className="result-submit" disabled={pending}>
-        {pending ? "Запазване..." : "Запази резултата"}
+        {pending ? "Запазване..." : submitLabel}
       </button>
     </form>
   );

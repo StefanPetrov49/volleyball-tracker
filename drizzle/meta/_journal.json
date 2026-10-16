@@ -57,6 +57,13 @@
       "when": 1791594095563,
       "tag": "0007_sweet_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792181463517,
+      "tag": "0008_chunky_zodiak",
+      "breakpoints": true
     }
   ]
 }

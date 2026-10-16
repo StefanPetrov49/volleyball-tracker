@@ -12,7 +12,11 @@ export async function getPolls(userId: string | null): Promise<Poll[]> {
         db
             .select()
             .from(pollOptions)
-            .orderBy(asc(pollOptions.date), asc(pollOptions.time)),
+            .orderBy(
+                asc(pollOptions.position),
+                asc(pollOptions.date),
+                asc(pollOptions.time),
+            ),
         db
             .select({
                 pollId: votes.pollId,
@@ -58,6 +62,7 @@ export async function getPolls(userId: string | null): Promise<Poll[]> {
 
                     return {
                         id: option.id,
+                        label: option.label,
                         date: option.date,
                         time: hhmm(option.time),
                         location: option.location,
@@ -80,9 +85,13 @@ export async function createPoll(userId: string, input: PollInput) {
             .returning({ id: polls.id });
 
         await tx.insert(pollOptions).values(
-            input.options.map((option) => ({
+            input.options.map((option, index) => ({
                 pollId: poll.id,
-                ...option,
+                label: option.label,
+                date: option.date,
+                time: option.time,
+                location: option.location,
+                position: index,
             })),
         );
 
@@ -148,8 +157,6 @@ export async function updatePoll(
         return { error: "not_found" as const };
     }
 
-    console.log("Existing poll found:", existingPoll);
-
     const isAdmin = userRole === "admin";
     const isCreator = existingPoll.createdBy === userId;
 
@@ -192,15 +199,19 @@ export async function updatePoll(
             .set({ question: input.question })
             .where(eq(polls.id, pollId));
 
-        for (const option of input.options) {
+        for (const [index, option] of input.options.entries()) {
+            const values = {
+                label: option.label,
+                date: option.date,
+                time: option.time,
+                location: option.location,
+                position: index,
+            };
+
             if (option.id) {
                 await tx
                     .update(pollOptions)
-                    .set({
-                        date: option.date,
-                        time: option.time,
-                        location: option.location,
-                    })
+                    .set(values)
                     .where(
                         and(
                             eq(pollOptions.id, option.id),
@@ -208,12 +219,7 @@ export async function updatePoll(
                         ),
                     );
             } else {
-                await tx.insert(pollOptions).values({
-                    pollId,
-                    date: option.date,
-                    time: option.time,
-                    location: option.location,
-                });
+                await tx.insert(pollOptions).values({ pollId, ...values });
             }
         }
 

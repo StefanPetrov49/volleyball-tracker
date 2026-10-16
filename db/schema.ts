@@ -37,9 +37,11 @@ export const pollOptions = pgTable("poll_options", {
   pollId: uuid("poll_id")
     .notNull()
     .references(() => polls.id, { onDelete: "cascade" }),
-  date: date("date", { mode: "string" }).notNull(),
+  label: text("label"),
+  date: date("date", { mode: "string" }),
   time: time("time"),
   location: text("location"),
+  position: integer("position").notNull().default(0),
 });
 
 export const votes = pgTable(

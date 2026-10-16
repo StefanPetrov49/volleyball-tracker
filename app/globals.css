@@ -986,3 +986,17 @@ body > main{flex:1}
     font-size:.85rem;
   }
 }
+
+.poll-option-label{
+  flex:1 1 100%;
+  font-weight:600;
+}
+
+.poll-error{
+  margin:0 0 14px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:#fee2e2;
+  color:#b91c1c;
+  font-size:.88rem;
+}

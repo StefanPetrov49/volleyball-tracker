@@ -25,7 +25,10 @@ export async function POST(req: Request) {
   );
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Попълни въпроса и поне два непразни варианта." },
+      { status: 400 },
+    );
   }
 
   const id = await createPoll(user.id, parsed.data);

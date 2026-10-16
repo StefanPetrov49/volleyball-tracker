@@ -1,6 +1,7 @@
 export type PollOption = {
   id: string;
-  date: string;
+  label: string | null;
+  date: string | null;
   time: string | null;
   location: string | null;
   votes: number;

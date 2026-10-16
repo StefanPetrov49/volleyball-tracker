@@ -4,17 +4,39 @@ import { useEffect, useState } from "react";
 import type { Poll } from "@/types/poll";
 import { useAuth } from "@/lib/AuthContext";
 
+type OptionField = "label" | "date" | "time" | "location";
+
 type DraftOption = {
   id?: string;
+  label: string;
   date: string;
   time: string;
   location: string;
   votes?: number;
 };
 
-const fmt = (date: string, time?: string) => {
-  const d = new Date(date);
-  const dateStr = d.toLocaleDateString("bg-BG", {
+const emptyOption = (): DraftOption => ({
+  label: "",
+  date: "",
+  time: "",
+  location: "",
+});
+
+const isFilled = (o: DraftOption) =>
+  [o.label, o.date, o.time, o.location].some((v) => v.trim() !== "");
+
+const toPayload = ({ id, label, date, time, location }: DraftOption) => ({
+  ...(id ? { id } : {}),
+  label: label.trim() || null,
+  date: date || null,
+  time: time || null,
+  location: location.trim() || null,
+});
+
+const fmtDate = (date: string | null, time?: string | null) => {
+  if (!date) return time ?? "";
+
+  const dateStr = new Date(date).toLocaleDateString("bg-BG", {
     weekday: "short",
     day: "numeric",
     month: "long",
@@ -24,68 +46,126 @@ const fmt = (date: string, time?: string) => {
   return time ? `${dateStr}, ${time}` : dateStr;
 };
 
+function OptionRow({
+  index,
+  option,
+  canRemove,
+  disabled,
+  onChange,
+  onRemove,
+}: {
+  index: number;
+  option: DraftOption;
+  canRemove: boolean;
+  disabled?: boolean;
+  onChange: (field: OptionField, value: string) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="poll-option-row">
+      <span className="poll-option-num">{index + 1}</span>
+
+      <input
+        className="poll-option-label"
+        value={option.label}
+        onChange={(e) => onChange("label", e.target.value)}
+        placeholder="Свободен текст"
+        maxLength={120}
+      />
+
+      <input
+        type="date"
+        value={option.date}
+        onChange={(e) => onChange("date", e.target.value)}
+      />
+
+      <input
+        type="time"
+        value={option.time}
+        onChange={(e) => onChange("time", e.target.value)}
+      />
+
+      <input
+        value={option.location}
+        onChange={(e) => onChange("location", e.target.value)}
+        placeholder="Зала (по желание)"
+        maxLength={120}
+      />
+
+      {canRemove && (
+        <button
+          type="button"
+          className="poll-remove-btn"
+          onClick={onRemove}
+          disabled={disabled}
+          aria-label="Премахни"
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  );
+}
+
 function CreatePollForm({ onCreated }: { onCreated: () => void }) {
   const [question, setQuestion] = useState("Кога играем?");
-  const [options, setOptions] = useState([
-    { date: "", time: "", location: "" },
-    { date: "", time: "", location: "" },
+  const [options, setOptions] = useState<DraftOption[]>([
+    emptyOption(),
+    emptyOption(),
   ]);
+  const [error, setError] = useState<string | null>(null);
 
-  const setOption = (index: number, field: string, value: string) => {
+  const setOption = (index: number, field: OptionField, value: string) => {
     setOptions((current) =>
-      current.map((option, optionIndex) =>
-        optionIndex === index
-          ? { ...option, [field]: value }
-          : option,
-      ),
+      current.map((o, i) => (i === index ? { ...o, [field]: value } : o)),
     );
   };
 
   const addOption = () => {
     if (options.length >= 10) return;
-
-    setOptions((current) => [
-      ...current,
-      { date: "", time: "", location: "" },
-    ]);
+    setOptions((current) => [...current, emptyOption()]);
   };
 
   const removeOption = (index: number) => {
     if (options.length <= 2) return;
+    setOptions((current) => current.filter((_, i) => i !== index));
+  };
 
-    setOptions((current) =>
-      current.filter((_, optionIndex) => optionIndex !== index),
-    );
+  const applyYesNo = () => {
+    setQuestion("");
+    setOptions([
+      { ...emptyOption(), label: "Да" },
+      { ...emptyOption(), label: "Не" },
+    ]);
   };
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const filledOptions = options.filter((option) => option.date);
+    const filled = options.filter(isFilled);
 
-    if (filledOptions.length < 2) {
+    if (filled.length < 2) {
+      setError("Попълни поне два варианта.");
       return;
     }
+
+    setError(null);
 
     const response = await fetch("/api/polls", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question,
-        options: filledOptions,
-      }),
+      body: JSON.stringify({ question, options: filled.map(toPayload) }),
     });
 
     if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      setError(body?.error ?? "Анкетата не можа да бъде създадена.");
       return;
     }
 
     onCreated();
     setQuestion("Кога играем?");
-    setOptions([
-      { date: "", time: "", location: "" },
-      { date: "", time: "", location: "" },
-    ]);
+    setOptions([emptyOption(), emptyOption()]);
   };
 
   return (
@@ -96,54 +176,28 @@ function CreatePollForm({ onCreated }: { onCreated: () => void }) {
         <label>Въпрос</label>
         <input
           value={question}
-          onChange={(event) => setQuestion(event.target.value)}
+          onChange={(e) => setQuestion(e.target.value)}
           required
+          maxLength={200}
         />
       </div>
 
+      {error && (
+        <p role="alert" className="poll-error">
+          {error}
+        </p>
+      )}
+
       <div className="poll-options-list">
         {options.map((option, index) => (
-          <div key={index} className="poll-option-row">
-            <span className="poll-option-num">{index + 1}</span>
-
-            <input
-              type="date"
-              value={option.date}
-              onChange={(event) =>
-                setOption(index, "date", event.target.value)
-              }
-              required
-              placeholder="Дата"
-            />
-
-            <input
-              type="time"
-              value={option.time}
-              onChange={(event) =>
-                setOption(index, "time", event.target.value)
-              }
-              placeholder="Час"
-            />
-
-            <input
-              value={option.location}
-              onChange={(event) =>
-                setOption(index, "location", event.target.value)
-              }
-              placeholder="Зала (по желание)"
-            />
-
-            {options.length > 2 && (
-              <button
-                type="button"
-                className="poll-remove-btn"
-                onClick={() => removeOption(index)}
-                aria-label="Премахни"
-              >
-                ✕
-              </button>
-            )}
-          </div>
+          <OptionRow
+            key={index}
+            index={index}
+            option={option}
+            canRemove={options.length > 2}
+            onChange={(field, value) => setOption(index, field, value)}
+            onRemove={() => removeOption(index)}
+          />
         ))}
       </div>
 
@@ -155,6 +209,14 @@ function CreatePollForm({ onCreated }: { onCreated: () => void }) {
           disabled={options.length >= 10}
         >
           + Добави вариант
+        </button>
+
+        <button
+          type="button"
+          className="poll-add-option-btn"
+          onClick={applyYesNo}
+        >
+          Да / Не
         </button>
 
         <button type="submit" className="poll-submit-btn">
@@ -177,39 +239,28 @@ function EditPollForm({
   const [question, setQuestion] = useState(poll.question);
 
   const [options, setOptions] = useState<DraftOption[]>(
-    poll.options.map((option) => ({
-      id: option.id,
-      date: option.date,
-      time: option.time ?? "",
-      location: option.location ?? "",
-      votes: option.votes,
+    poll.options.map((o) => ({
+      id: o.id,
+      label: o.label ?? "",
+      date: o.date ?? "",
+      time: o.time ?? "",
+      location: o.location ?? "",
+      votes: o.votes,
     })),
   );
 
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const setOption = (
-    index: number,
-    field: "date" | "time" | "location",
-    value: string,
-  ) => {
+  const setOption = (index: number, field: OptionField, value: string) => {
     setOptions((current) =>
-      current.map((option, optionIndex) =>
-        optionIndex === index
-          ? { ...option, [field]: value }
-          : option,
-      ),
+      current.map((o, i) => (i === index ? { ...o, [field]: value } : o)),
     );
   };
 
   const addOption = () => {
     if (options.length >= 10) return;
-
-    setOptions((current) => [
-      ...current,
-      { date: "", time: "", location: "" },
-    ]);
+    setOptions((current) => [...current, emptyOption()]);
   };
 
   const removeOption = (index: number) => {
@@ -220,25 +271,24 @@ function EditPollForm({
     if (
       option.votes &&
       !window.confirm(
-        `Този вариант има ${option.votes} ${option.votes === 1 ? "глас" : "гласа"
+        `Този вариант има ${option.votes} ${
+          option.votes === 1 ? "глас" : "гласа"
         }. При премахване ще бъдат изтрити само гласовете за този вариант. Продължаваме ли?`,
       )
     ) {
       return;
     }
 
-    setOptions((current) =>
-      current.filter((_, optionIndex) => optionIndex !== index),
-    );
+    setOptions((current) => current.filter((_, i) => i !== index));
   };
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const filledOptions = options.filter((option) => option.date);
+    const filled = options.filter(isFilled);
 
-    if (filledOptions.length < 2) {
-      setError("Добави поне два варианта с дата.");
+    if (filled.length < 2) {
+      setError("Попълни поне два варианта.");
       return;
     }
 
@@ -248,25 +298,14 @@ function EditPollForm({
     const response = await fetch(`/api/polls/${poll.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question,
-        options: filledOptions.map(({ id, date, time, location }) => ({
-          ...(id ? { id } : {}),
-          date,
-          time,
-          location,
-        })),
-      }),
+      body: JSON.stringify({ question, options: filled.map(toPayload) }),
     });
 
     setSaving(false);
 
     if (!response.ok) {
-      const responseBody = await response.json().catch(() => null);
-
-      setError(
-        responseBody?.error ?? "Анкетата не можа да бъде редактирана.",
-      );
+      const body = await response.json().catch(() => null);
+      setError(body?.error ?? "Анкетата не можа да бъде редактирана.");
       return;
     }
 
@@ -282,14 +321,17 @@ function EditPollForm({
         премахване на вариант се изтриват само неговите гласове.
       </p>
 
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p role="alert" className="poll-error">
+          {error}
+        </p>
+      )}
 
       <div className="poll-form-field">
         <label>Въпрос</label>
-
         <input
           value={question}
-          onChange={(event) => setQuestion(event.target.value)}
+          onChange={(e) => setQuestion(e.target.value)}
           required
           maxLength={200}
         />
@@ -297,47 +339,15 @@ function EditPollForm({
 
       <div className="poll-options-list">
         {options.map((option, index) => (
-          <div key={option.id ?? `new-${index}`} className="poll-option-row">
-            <span className="poll-option-num">{index + 1}</span>
-
-            <input
-              type="date"
-              value={option.date}
-              onChange={(event) =>
-                setOption(index, "date", event.target.value)
-              }
-              required
-            />
-
-            <input
-              type="time"
-              value={option.time}
-              onChange={(event) =>
-                setOption(index, "time", event.target.value)
-              }
-            />
-
-            <input
-              value={option.location}
-              onChange={(event) =>
-                setOption(index, "location", event.target.value)
-              }
-              placeholder="Зала (по желание)"
-              maxLength={120}
-            />
-
-            {options.length > 2 && (
-              <button
-                type="button"
-                className="poll-remove-btn"
-                onClick={() => removeOption(index)}
-                aria-label="Премахни"
-                disabled={saving}
-              >
-                ✕
-              </button>
-            )}
-          </div>
+          <OptionRow
+            key={option.id ?? `new-${index}`}
+            index={index}
+            option={option}
+            canRemove={options.length > 2}
+            disabled={saving}
+            onChange={(field, value) => setOption(index, field, value)}
+            onRemove={() => removeOption(index)}
+          />
         ))}
       </div>
 
@@ -360,11 +370,7 @@ function EditPollForm({
           Отказ
         </button>
 
-        <button
-          type="submit"
-          className="poll-submit-btn"
-          disabled={saving}
-        >
+        <button type="submit" className="poll-submit-btn" disabled={saving}>
           {saving ? "Запазване..." : "Запази промените"}
         </button>
       </div>
@@ -385,11 +391,8 @@ function PollCard({
 }) {
   const notVoted = poll.notVoted ?? [];
   const hasVoted = poll.myVotes.length > 0;
-  const totalVotes = poll.options.reduce(
-    (sum, option) => sum + option.votes,
-    0,
-  );
-  const maxVotes = Math.max(...poll.options.map((option) => option.votes));
+  const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0);
+  const maxVotes = Math.max(...poll.options.map((o) => o.votes));
 
   const toggle = async (optionId: string) => {
     const response = await fetch(`/api/polls/${poll.id}/vote`, {
@@ -408,11 +411,7 @@ function PollCard({
       <h4 className="poll-question">{poll.question}</h4>
 
       {canEdit && (
-        <button
-          type="button"
-          className="poll-add-option-btn"
-          onClick={onEdit}
-        >
+        <button type="button" className="poll-add-option-btn" onClick={onEdit}>
           Редактирай
         </button>
       )}
@@ -426,20 +425,23 @@ function PollCard({
             : 0;
 
           const isMine = poll.myVotes.includes(option.id);
-          const isWinner =
-            hasVoted && maxVotes > 0 && option.votes === maxVotes;
+          const isWinner = hasVoted && maxVotes > 0 && option.votes === maxVotes;
+          const when = fmtDate(option.date, option.time);
 
           return (
             <button
               key={option.id}
-              className={`poll-vote-row ${isMine ? "poll-voted" : ""} ${isWinner ? "poll-winner" : ""
-                } ${hasVoted && !isWinner ? "poll-loser" : ""}`}
+              className={`poll-vote-row ${isMine ? "poll-voted" : ""} ${
+                isWinner ? "poll-winner" : ""
+              } ${hasVoted && !isWinner ? "poll-loser" : ""}`}
               onClick={() => toggle(option.id)}
             >
               <div className="poll-vote-label">
                 <span>
                   {isMine ? "☑" : "☐"}{" "}
-                  {fmt(option.date, option.time ?? undefined)}
+                  {option.label && <strong>{option.label}</strong>}
+                  {option.label && when ? " · " : ""}
+                  {when}
                 </span>
 
                 {option.location && (
@@ -456,20 +458,12 @@ function PollCard({
               </div>
 
               <div className="poll-vote-right">
-                {hasVoted && (
-                  <span className="poll-pct">{percentage}%</span>
-                )}
-
-                <span className="poll-count">
-                  {option.votes} гласа
-                </span>
+                {hasVoted && <span className="poll-pct">{percentage}%</span>}
+                <span className="poll-count">{option.votes} гласа</span>
               </div>
 
               {hasVoted && (
-                <div
-                  className="poll-bar"
-                  style={{ width: `${percentage}%` }}
-                />
+                <div className="poll-bar" style={{ width: `${percentage}%` }} />
               )}
             </button>
           );

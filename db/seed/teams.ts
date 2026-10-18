@@ -19,6 +19,7 @@ const data = [
   { name: "Холестеролни лъвове", slug: "holesterolni-lavove" },
   { name: "Нова Звезда", slug: "nova-zvezda" },
   { name: "The Incrediballs", slug: "the-incrediballs" },
+  { name: "Цунами", slug: "tsunami" },
 ];
 
 async function main() {

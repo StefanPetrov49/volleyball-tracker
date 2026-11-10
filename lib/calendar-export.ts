@@ -31,7 +31,10 @@ function matchRange(match: Match): EventRange {
 const utcStamp = (d: Date) =>
   d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 
-export const eventTitle = (match: Match) => `${TEAM} vs ${match.opponent}`;
+export const eventTitle = (match: Match) =>
+  match.result?.finished
+    ? `${TEAM} ${match.result.us}:${match.result.them} ${match.opponent}`
+    : `${TEAM} vs ${match.opponent}`;
 
 const eventDescription = (match: Match) =>
   `Волейбол: ${TEAM} vs ${match.opponent} (${match.home ? "Домакини" : "Гости"})`;
@@ -87,19 +90,15 @@ function foldLine(line: string): string {
   return chunks.join("\r\n ");
 }
 
-export function buildMatchIcs(match: Match): string {
+/** VEVENT lines for one match. */
+function eventLines(match: Match, stamp: string): string[] {
   const range = matchRange(match);
   const location = match.location?.trim();
 
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Yakite Pichove//Volleyball Tracker//BG",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
+  return [
     "BEGIN:VEVENT",
-    `UID:match-${match.id}@yakite-pichove`,
-    `DTSTAMP:${utcStamp(new Date())}`,
+    `UID:match-${match.id}@yakite-pichove`, // stable → updates replace the old event
+    `DTSTAMP:${stamp}`,
     ...(range.allDay
       ? [`DTSTART;VALUE=DATE:${range.start}`, `DTEND;VALUE=DATE:${range.end}`]
       : [`DTSTART:${utcStamp(range.start)}`, `DTEND:${utcStamp(range.end)}`]),
@@ -116,10 +115,42 @@ export function buildMatchIcs(match: Match): string {
           "END:VALARM",
         ]),
     "END:VEVENT",
+  ];
+}
+
+function calendar(headerExtra: string[], events: string[]): string {
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Yakite Pichove//Volleyball Tracker//BG",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    ...headerExtra,
+    ...events,
     "END:VCALENDAR",
   ];
-
   return lines.map(foldLine).join("\r\n") + "\r\n";
+}
+
+/** Single match → .ics download ("＋ Apple Календар" button). */
+export function buildMatchIcs(match: Match): string {
+  return calendar([], eventLines(match, utcStamp(new Date())));
+}
+
+/** All matches → subscribable feed (/calendar.ics). Calendar apps re-download it periodically. */
+export function buildSeasonIcs(matches: Match[]): string {
+  const stamp = utcStamp(new Date());
+  return calendar(
+    [
+      `X-WR-CALNAME:${escapeText(TEAM)}`,
+      `X-WR-CALDESC:${escapeText(`Мачовете на ${TEAM}`)}`,
+      "X-WR-TIMEZONE:Europe/Sofia",
+      // hint for how often apps should refresh (Apple/Outlook respect it, Google decides itself)
+      "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
+      "X-PUBLISHED-TTL:PT6H",
+    ],
+    matches.flatMap((m) => eventLines(m, stamp)),
+  );
 }
 
 export const icsFileName = (match: Match) => `yakite-pichove-${match.date}.ics`;

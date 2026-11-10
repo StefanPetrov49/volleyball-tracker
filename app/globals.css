@@ -1225,3 +1225,55 @@ button.cal-event:focus-visible{outline:2px solid var(--charcoal);outline-offset:
 @media(max-width:600px){
   .add-cal-dark .add-cal-btn{padding:6px 10px;font-size:.74rem}
 }
+
+/* ---------- Subscribe to calendar ---------- */
+.subscribe-cal{
+  margin-top:16px;padding:14px 16px;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+  background:#fff;border:1px solid var(--line);border-left:6px solid var(--blue);
+  border-radius:12px;box-shadow:0 2px 8px #0001;
+}
+.subscribe-cal-text{display:flex;flex-direction:column;gap:2px}
+.subscribe-cal-text span{font-size:.82rem;color:var(--muted)}
+.subscribe-cal .add-cal{margin-top:0}
+button.add-cal-btn{font-family:inherit;cursor:pointer}
+
+/* ---------- Calendar "Днес" button ---------- */
+.cal-title{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cal-head .cal-today-btn{
+  width:auto;height:26px;padding:0 12px;
+  border:1.5px solid var(--charcoal);border-radius:999px;
+  background:transparent;color:var(--charcoal);
+  font:inherit;font-size:.75rem;font-weight:600;
+}
+.cal-head .cal-today-btn:hover{background:var(--orange);border-color:var(--orange);color:#fff}
+
+/* ---------- Hall → Google Maps link ---------- */
+.hall-link{
+  color:inherit;
+  text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;
+}
+.hall-link:hover{color:var(--orange);text-decoration-style:solid}
+.next .hall-link:hover{color:var(--blue)}
+
+/* ---------- Past matches & results in the calendar ---------- */
+.cal-cell.past{opacity:.75}
+.cal-cell.past.has-match{background:#f3f1ed;border-color:var(--line)}
+.cal-cell.past.has-match:hover{opacity:1}
+.cal-event.cal-event-past{background:#a9a59f}
+.cal-event.cal-event-win{background:var(--blue);color:var(--charcoal)}
+.cal-event.cal-event-loss{background:var(--charcoal)}
+.match-popup-result{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-top:12px;padding:8px 10px;border-radius:8px;
+  background:var(--blue-soft);color:var(--charcoal);
+}
+.match-popup-result.loss{background:#ecebe8}
+.match-popup-score{display:flex;align-items:baseline;gap:6px;font-size:1.3rem;font-weight:800}
+.match-popup-score small{font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--muted)}
+.match-popup-sets{font-size:.78rem;color:var(--muted)}
+.match-popup-link{
+  display:inline-block;margin-top:10px;
+  font-size:.82rem;font-weight:700;color:var(--orange);text-decoration:none;
+}
+.match-popup-link:hover{text-decoration:underline}

@@ -77,6 +77,11 @@ export const matchResults = pgTable("match_results", {
   setsWonB: integer("sets_won_b").notNull(),
   sets: jsonb("sets").$type<{ a: number; b: number }[]>().notNull().default([]),
   videoUrl: text("video_url"),
+  // Optional link to the scheduled match (one result per match).
+  // Deleting the scheduled match keeps the result and just clears the link.
+  matchId: uuid("match_id")
+    .unique()
+    .references(() => matches.id, { onDelete: "set null" }),
   playedAt: timestamp("played_at", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

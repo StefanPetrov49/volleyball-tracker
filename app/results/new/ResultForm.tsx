@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import type { Team } from "@/lib/teams";
 import type { ResultFormState } from "@/lib/result-input";
+import type { ScheduleOption } from "@/lib/services/matches";
 
 const SET_COUNT = 5;
 
@@ -13,11 +14,15 @@ export type ResultFormInitial = {
   teamBId: string;
   playedAt: string;
   videoUrl: string;
+  matchId: string; // "" = not linked
   sets: SetInput[];
 };
 
 type Props = {
   teams: Team[];
+  scheduleOptions: ScheduleOption[];
+  /** when editing: lets this result keep its own linked match */
+  currentResultId?: number;
   action: (
     prevState: ResultFormState,
     formData: FormData,
@@ -26,13 +31,27 @@ type Props = {
   submitLabel: string;
 };
 
-export default function ResultForm({ teams, action, initial, submitLabel }: Props) {
+const BG_DAY = new Intl.DateTimeFormat("bg-BG", { day: "numeric", month: "long", year: "numeric" });
+const optionLabel = (o: ScheduleOption) => {
+  const [y, m, d] = o.date.split("-").map(Number);
+  return `${BG_DAY.format(new Date(y, m - 1, d))}${o.time ? `, ${o.time.slice(0, 5)}` : ""} – vs ${o.opponent}`;
+};
+
+export default function ResultForm({ teams, scheduleOptions, currentResultId, action, initial, submitLabel }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
 
   const [teamAId, setTeamAId] = useState(initial.teamAId);
   const [teamBId, setTeamBId] = useState(initial.teamBId);
   const [playedAt, setPlayedAt] = useState(initial.playedAt);
   const [videoUrl, setVideoUrl] = useState(initial.videoUrl);
+
+  // A scheduled match is free if it has no result yet, or it's this result's own match
+  const isFree = (o: ScheduleOption) => o.resultId === null || o.resultId === currentResultId;
+  // Suggest the free scheduled match on the same day as "Начало на мача"
+  const suggestFor = (localDateTime: string) =>
+    scheduleOptions.find((o) => o.date === localDateTime.slice(0, 10) && isFree(o))?.id ?? "";
+  const [matchId, setMatchId] = useState(() => initial.matchId || suggestFor(initial.playedAt));
+  const [matchTouched, setMatchTouched] = useState(Boolean(initial.matchId));
   const [sets, setSets] = useState<SetInput[]>(
     Array.from({ length: SET_COUNT }, (_, i) => initial.sets[i] ?? { a: "", b: "" }),
   );
@@ -110,9 +129,35 @@ export default function ResultForm({ teams, action, initial, submitLabel }: Prop
             name="playedAt"
             type="datetime-local"
             value={playedAt}
-            onChange={(e) => setPlayedAt(e.target.value)}
+            onChange={(e) => {
+              setPlayedAt(e.target.value);
+              if (!matchTouched) setMatchId(suggestFor(e.target.value));
+            }}
             required
           />
+        </label>
+
+        <label className="result-field">
+          <span>Мач от графика <small>(по желание)</small></span>
+          <select
+            name="matchId"
+            value={matchId}
+            onChange={(e) => {
+              setMatchId(e.target.value);
+              setMatchTouched(true);
+            }}
+          >
+            <option value="">– Без връзка –</option>
+            {scheduleOptions.map((o) => (
+              <option key={o.id} value={o.id} disabled={!isFree(o)}>
+                {optionLabel(o)}
+                {isFree(o) ? "" : " (вече има резултат)"}
+              </option>
+            ))}
+          </select>
+          <small className="result-hint">
+            Свързва резултата с мача в календара – там ще се покаже резултатът.
+          </small>
         </label>
 
         <label className="result-field">

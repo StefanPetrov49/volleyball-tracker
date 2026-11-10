@@ -73,3 +73,22 @@ export function formatSofia(date: Date): string {
     minute: "2-digit",
   });
 }
+
+// ---------- Date-only helpers for match dates ("YYYY-MM-DD") ----------
+
+// Hardcoded: Intl's Bulgarian short month names differ between browsers/Node
+// ("ное", "ноем.", or even "11"), so we use our own.
+const BG_MONTHS_SHORT = ["яну", "фев", "мар", "апр", "май", "юни", "юли", "авг", "сеп", "окт", "ное", "дек"];
+
+/**
+ * "2026-11-11" → Date at local midnight of that day.
+ * (new Date("2026-11-11") would be UTC midnight, which shows the previous day
+ * for anyone west of UTC.)
+ */
+export function parseMatchDate(date: string): Date {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** Month index 0-11 → "яну" … "дек" */
+export const monthShortBg = (monthIndex: number) => BG_MONTHS_SHORT[monthIndex];

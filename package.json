@@ -15,7 +15,8 @@
     "seed:dev": "tsx db/seed/dev.ts",
     "seed:prod": "tsx db/seed/prod.ts",
     "user:create": "tsx scripts/create-user.ts",
-    "seed:teams": "dotenv -e .env.local -- tsx db/seed/teams.ts"
+    "seed:teams": "dotenv -e .env.local -- tsx db/seed/teams.ts",
+    "results:link": "tsx scripts/link-results.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.7",

@@ -5,6 +5,7 @@ import type { Match } from "@/types/match";
 import CalendarView from "./CalendarView";
 import TilesView from "./TilesView";
 import PollSection from "./PollSection";
+import SubscribeCalendar from "./SubscribeCalendar";
 
 export default function Schedule({ matches: initial }: { matches: Match[] }) {
   const [view, setView] = useState<"calendar" | "tiles" | "polls">("calendar");
@@ -35,6 +36,7 @@ export default function Schedule({ matches: initial }: { matches: Match[] }) {
       {view === "calendar" && <CalendarView matches={matches} />}
       {view === "tiles" && <TilesView matches={matches} />}
       {view === "polls" && <PollSection />}
+      {(view === "calendar" || view === "tiles") && <SubscribeCalendar />}
     </section>
   );
 }

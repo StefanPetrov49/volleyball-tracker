@@ -4,12 +4,13 @@ import { createMatchResult } from "./actions";
 import { requireAdmin } from "@/lib/session";
 import { getTeams } from "@/lib/teams";
 import { nowSofiaLocal } from "@/lib/datetime";
+import { getScheduleOptions } from "@/lib/services/matches";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewResultPage() {
   await requireAdmin();
-  const teams = await getTeams();
+  const [teams, scheduleOptions] = await Promise.all([getTeams(), getScheduleOptions()]);
 
   return (
     <PageLayout>
@@ -25,6 +26,7 @@ export default async function NewResultPage() {
 
       <ResultForm
         teams={teams}
+        scheduleOptions={scheduleOptions}
         action={createMatchResult}
         submitLabel="Запази"
         initial={{
@@ -32,6 +34,7 @@ export default async function NewResultPage() {
           teamBId: "",
           playedAt: nowSofiaLocal(),
           videoUrl: "",
+          matchId: "",
           sets: [],
         }}
       />

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiUser } from "@/lib/session";
-import { toggleVote } from "@/lib/services/polls";
+import { getPoll, toggleVote } from "@/lib/services/polls";
 
 const voteBody = z.object({
   optionId: z.string().uuid(),
@@ -41,5 +41,7 @@ export async function POST(
   return NextResponse.json({
     ok: true,
     voted: result.voted,
+    // the refreshed poll, so the page updates just this card
+    poll: await getPoll(user.id, parsedPollId.data),
   });
 }

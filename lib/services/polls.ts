@@ -6,72 +6,81 @@ import type { PollInput, PollUpdateInput } from "../validation/poll";
 
 const hhmm = (t: string | null) => (t ? t.slice(0, 5) : null);
 
-export async function getPolls(userId: string | null): Promise<Poll[]> {
-    const [pollRows, optionRows, voteRows, teamUsers] = await Promise.all([
-        db.select().from(polls).orderBy(desc(polls.createdAt)),
+type PollRow = typeof polls.$inferSelect;
+
+/** Builds full Poll objects (options, votes, who hasn't voted) for just these polls. */
+async function buildPolls(userId: string | null, pollRows: PollRow[]): Promise<Poll[]> {
+    if (pollRows.length === 0) return [];
+    const ids = pollRows.map((p) => p.id);
+
+    const [optionRows, voteRows, teamUsers] = await Promise.all([
         db
             .select()
             .from(pollOptions)
-            .orderBy(
-                asc(pollOptions.position),
-                asc(pollOptions.date),
-                asc(pollOptions.time),
-            ),
+            .where(inArray(pollOptions.pollId, ids))
+            .orderBy(asc(pollOptions.position), asc(pollOptions.date), asc(pollOptions.time)),
         db
-            .select({
-                pollId: votes.pollId,
-                optionId: votes.optionId,
-                userId: votes.userId,
-                name: user.name,
-            })
+            .select({ pollId: votes.pollId, optionId: votes.optionId, userId: votes.userId, name: user.name })
             .from(votes)
-            .innerJoin(user, eq(votes.userId, user.id)),
-        db
-            .select({
-                id: user.id,
-                name: user.name,
-                role: user.role,
-                banned: user.banned,
-            })
-            .from(user),
+            .innerJoin(user, eq(votes.userId, user.id))
+            .where(inArray(votes.pollId, ids)),
+        db.select({ id: user.id, name: user.name, banned: user.banned }).from(user),
     ]);
 
-    return pollRows.map((poll) => {
-        const pollVotes = voteRows.filter((vote) => vote.pollId === poll.id);
-        const voterIds = new Set(pollVotes.map((vote) => vote.userId));
+    const activeUsers = teamUsers.filter((u) => !u.banned);
 
-        const notVoted = teamUsers
-            .filter((teamUser) => !teamUser.banned && !voterIds.has(teamUser.id))
-            .map((teamUser) => teamUser.name);
+    return pollRows.map((poll) => {
+        const pollVotes = voteRows.filter((v) => v.pollId === poll.id);
+        const voterIds = new Set(pollVotes.map((v) => v.userId));
 
         return {
             id: poll.id,
             question: poll.question,
             createdBy: poll.createdBy,
             createdAt: poll.createdAt.toISOString(),
-            myVotes: pollVotes
-                .filter((vote) => vote.userId === userId)
-                .map((vote) => vote.optionId),
-            notVoted,
+            myVotes: pollVotes.filter((v) => v.userId === userId).map((v) => v.optionId),
+            notVoted: activeUsers.filter((u) => !voterIds.has(u.id)).map((u) => u.name),
             options: optionRows
-                .filter((option) => option.pollId === poll.id)
-                .map((option) => {
-                    const voters = pollVotes
-                        .filter((vote) => vote.optionId === option.id)
-                        .map((vote) => vote.name);
-
+                .filter((o) => o.pollId === poll.id)
+                .map((o) => {
+                    const voters = pollVotes.filter((v) => v.optionId === o.id).map((v) => v.name);
                     return {
-                        id: option.id,
-                        label: option.label,
-                        date: option.date,
-                        time: hhmm(option.time),
-                        location: option.location,
+                        id: o.id,
+                        label: o.label,
+                        date: o.date,
+                        time: hhmm(o.time),
+                        location: o.location,
                         votes: voters.length,
                         voters,
                     };
                 }),
         };
     });
+}
+
+/**
+ * One page of polls, newest first. Only the polls on this page (and their options/votes)
+ * are loaded – the old version loaded every poll and vote ever made on each request.
+ */
+export async function getPolls(
+    userId: string | null,
+    { offset = 0, limit = 5 }: { offset?: number; limit?: number } = {},
+): Promise<{ polls: Poll[]; hasMore: boolean }> {
+    const rows = await db
+        .select()
+        .from(polls)
+        .orderBy(desc(polls.createdAt), desc(polls.id))
+        .limit(limit + 1) // one extra tells us if there's another page
+        .offset(offset);
+
+    return { polls: await buildPolls(userId, rows.slice(0, limit)), hasMore: rows.length > limit };
+}
+
+/** A single poll – sent back after a vote so only that card refreshes. */
+export async function getPoll(userId: string | null, pollId: string): Promise<Poll | null> {
+    const rows = await db.select().from(polls).where(eq(polls.id, pollId)).limit(1);
+    const [poll] = await buildPolls(userId, rows);
+    return poll ?? null;
 }
 
 export async function createPoll(userId: string, input: PollInput) {

@@ -10,6 +10,7 @@ import {
   serial,
   integer,
   jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
@@ -88,3 +89,18 @@ export const matchResults = pgTable("match_results", {
 
 export type MatchResult = typeof matchResults.$inferSelect;
 export type NewMatchResult = typeof matchResults.$inferInsert;
+
+// "Последни промени" on /admin: who changed what. Rows older than 180 days are pruned.
+export const activityLog = pgTable(
+  "activity_log",
+  {
+    id: serial("id").primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    actorId: text("actor_id").references(() => user.id, { onDelete: "set null" }),
+    actorName: text("actor_name").notNull(), // kept even if the user is deleted later
+    action: text("action").notNull(), // e.g. "match.created"
+    summary: text("summary").notNull(), // e.g. "добави мач vs Чуковете · 20 ное"
+    href: text("href"), // where the row links to
+  },
+  (t) => [index("activity_log_created_at_idx").on(t.createdAt)],
+);

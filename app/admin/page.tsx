@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/session";
 import { getAdminOverview } from "@/lib/services/admin-overview";
+import { getRecentActivity } from "@/lib/services/activity";
+import ActivityList from "@/components/ActivityList";
 import { monthShortBg, parseMatchDate } from "@/lib/datetime";
 import type { Match } from "@/types/match";
 
@@ -54,7 +56,7 @@ type Attention = { href: string; icon: ReactNode; tone: "warn" | "info"; title: 
 
 export default async function AdminPage() {
   const session = await requireAdmin();
-  const o = await getAdminOverview();
+  const [o, activity] = await Promise.all([getAdminOverview(), getRecentActivity(8)]);
   const firstName = session.user.name.split(" ")[0];
 
   const attention: Attention[] = [];
@@ -203,6 +205,20 @@ export default async function AdminPage() {
               <span>Имена и логота на противниците</span>
             </span>
           </div>
+        </div>
+      </section>
+
+      <section className="admin-block" aria-labelledby="activity-title">
+        <div className="admin-block-head admin-block-head-split">
+          <h2 id="activity-title">Последни промени</h2>
+          {activity.length > 0 && (
+            <Link href="/admin/activity" className="admin-more">
+              Всички
+            </Link>
+          )}
+        </div>
+        <div className="admin-list">
+          <ActivityList rows={activity} />
         </div>
       </section>
 

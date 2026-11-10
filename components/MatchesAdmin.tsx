@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Match } from "@/types/match";
 import { parseMatchDate } from "@/lib/datetime";
+import { toast } from "@/lib/toast";
 
 const empty = { date: "", time: "", opponent: "", location: "", home: true };
 const OTHER = "__other__"; // "Друг отбор…" option in the opponent dropdown
@@ -52,6 +53,7 @@ export default function MatchesAdmin({ upcoming, past, opponents }: Props) {
       setError("Неуспешен запис. Провери полетата.");
       return;
     }
+    toast(editingId ? "Промените по мача са запазени" : "Мачът е добавен");
     reset();
     router.refresh();
   };
@@ -67,8 +69,10 @@ export default function MatchesAdmin({ upcoming, past, opponents }: Props) {
   const remove = async (m: Match) => {
     if (!window.confirm(`Изтриване на мача срещу ${m.opponent}?`)) return;
     const res = await fetch(`/api/matches/${m.id}`, { method: "DELETE" });
-    if (res.ok) router.refresh();
-    else setError("Неуспешно изтриване.");
+    if (res.ok) {
+      toast("Мачът е изтрит");
+      router.refresh();
+    } else setError("Неуспешно изтриване.");
   };
 
   const selectValue = customOpponent ? OTHER : form.opponent;

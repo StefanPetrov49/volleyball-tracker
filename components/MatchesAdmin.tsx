@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Match } from "@/types/match";
+import { parseMatchDate } from "@/lib/datetime";
 
 const empty = { date: "", time: "", opponent: "", location: "", home: true };
 
 const fmt = (m: Match) => {
-  const d = new Date(m.date).toLocaleDateString("bg-BG", { weekday: "short", day: "numeric", month: "long", year: "numeric" });
+  const d = parseMatchDate(m.date).toLocaleDateString("bg-BG", { weekday: "short", day: "numeric", month: "long", year: "numeric" });
   return m.time ? `${d}, ${m.time}` : d;
 };
 
@@ -94,6 +96,15 @@ export default function MatchesAdmin({ matches }: { matches: Match[] }) {
             <div className="poll-form-actions">
               <button className="poll-add-option-btn" onClick={() => edit(m)}>Редактирай</button>
               <button className="poll-add-option-btn" onClick={() => remove(m)}>Изтрий</button>
+              {m.result ? (
+                <Link className="poll-add-option-btn admin-result-link done" href={`/results/${m.result.id}/edit`}>
+                  {m.result.finished ? `Резултат ${m.result.us}:${m.result.them} ✓` : "Резултат ✓"}
+                </Link>
+              ) : (
+                <Link className="poll-add-option-btn admin-result-link" href={`/results/new?matchId=${m.id}`}>
+                  + Резултат
+                </Link>
+              )}
             </div>
           </div>
         ))}

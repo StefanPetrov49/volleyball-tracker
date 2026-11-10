@@ -1,15 +1,26 @@
+import { redirect } from "next/navigation";
 import PageLayout from "@/components/PageLayout";
 import ResultForm from "./ResultForm";
 import { createMatchResult } from "./actions";
 import { requireAdmin } from "@/lib/session";
 import { getTeams } from "@/lib/teams";
 import { nowSofiaLocal } from "@/lib/datetime";
-import { getScheduleOptions } from "@/lib/services/matches";
+import { getResultPrefill, getScheduleOptions } from "@/lib/services/matches";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewResultPage() {
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type PageProps = { searchParams: Promise<{ matchId?: string }> };
+
+export default async function NewResultPage({ searchParams }: PageProps) {
   await requireAdmin();
+  const { matchId } = await searchParams;
+
+  // Opened from "+ Резултат" on a scheduled match → prefill teams, date and link
+  const prefill = matchId && UUID_RE.test(matchId) ? await getResultPrefill(matchId) : null;
+  if (prefill && "existingResultId" in prefill) redirect(`/results/${prefill.existingResultId}/edit`);
+
   const [teams, scheduleOptions] = await Promise.all([getTeams(), getScheduleOptions()]);
 
   return (
@@ -30,11 +41,11 @@ export default async function NewResultPage() {
         action={createMatchResult}
         submitLabel="Запази"
         initial={{
-          teamAId: "",
-          teamBId: "",
-          playedAt: nowSofiaLocal(),
+          teamAId: prefill?.teamAId ?? "",
+          teamBId: prefill?.teamBId ?? "",
+          playedAt: prefill?.playedAt ?? nowSofiaLocal(),
           videoUrl: "",
-          matchId: "",
+          matchId: prefill?.matchId ?? "",
           sets: [],
         }}
       />

@@ -36,7 +36,7 @@ export default function Schedule({ matches: initial }: { matches: Match[] }) {
       {view === "calendar" && <CalendarView matches={matches} />}
       {view === "tiles" && <TilesView matches={matches} />}
       {view === "polls" && <PollSection />}
-      {(view === "calendar" || view === "tiles") && <SubscribeCalendar />}
+      {view === "tiles" && <SubscribeCalendar />}
     </section>
   );
 }

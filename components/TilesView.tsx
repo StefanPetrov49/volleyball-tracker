@@ -1,11 +1,9 @@
 import type { Match } from "@/types/match";
 import MatchTile from "./MatchTile";
 import { useState } from "react";
+import { matchStartMs } from "@/lib/datetime";
 
-const matchTime = (match: Match) =>
-  new Date(
-    `${match.date}T${match.time?.trim() || "23:59"}`,
-  ).getTime();
+const matchTime = (match: Match) => matchStartMs(match.date, match.time);
 
 export default function TilesView({ matches }: { matches: Match[] }) {
   const [now] = useState(() => Date.now());

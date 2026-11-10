@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import type { Match } from "@/types/match";
 import AddToCalendar from "./AddToCalendar";
 import HallLink from "./HallLink";
-import { parseMatchDate } from "@/lib/datetime";
+import { matchStartMs, parseMatchDate } from "@/lib/datetime";
 
-const toDate = (m: Match) => new Date(`${m.date}T${m.time?.trim() || "23:59"}`);
+// Sofia time, so the countdown is right for visitors in any time zone
+const toDate = (m: Match) => new Date(matchStartMs(m.date, m.time));
 
 export default function NextMatch({ matches }: { matches: Match[] }) {
     const [now, setNow] = useState<number | null>(null);

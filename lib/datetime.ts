@@ -92,3 +92,12 @@ export function parseMatchDate(date: string): Date {
 
 /** Month index 0-11 → "яну" … "дек" */
 export const monthShortBg = (monthIndex: number) => BG_MONTHS_SHORT[monthIndex];
+
+/**
+ * Real start time of a scheduled match (ms since epoch), treating the stored
+ * date/time as Sofia time no matter where the visitor is.
+ * Matches without a time count as starting at 23:59 that day.
+ */
+export function matchStartMs(date: string, time: string | null): number {
+  return sofiaLocalToDate(`${date}T${time?.trim() || "23:59"}`)?.getTime() ?? NaN;
+}

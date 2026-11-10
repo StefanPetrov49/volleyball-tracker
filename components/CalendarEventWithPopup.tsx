@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Match } from "@/types/match";
 import MatchPopup from "./MatchPopup";
+import { matchStartMs } from "@/lib/datetime";
 
 const POPUP_WIDTH = 280; // px; the popup never gets wider than the screen minus EDGE*2
 const EDGE = 8; // min distance from the screen edge
@@ -11,8 +12,7 @@ const ROOM_ABOVE = 300; // if less space than this above the event, open below
 
 type Pos = { top: number; left: number; below: boolean };
 
-const isUpcoming = (m: Match) =>
-  new Date(`${m.date}T${m.time?.trim() || "23:59"}`).getTime() > Date.now();
+const isUpcoming = (m: Match) => matchStartMs(m.date, m.time) > Date.now();
 
 /**
  * Calendar event chip.

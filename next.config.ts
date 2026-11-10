@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   // make sure Vercel ships those files with the serverless function.
   outputFileTracingIncludes: {
     "/results/**": ["./public/teams/**/*", "./assets/fonts/**/*"],
+    "/pwa-icon/**": ["./public/teams/yakite-pichove.png", "./assets/fonts/**/*"],
+    "/apple-icon": ["./public/teams/yakite-pichove.png", "./assets/fonts/**/*"],
   },
 };
 

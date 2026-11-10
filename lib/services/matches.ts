@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import { matches, matchResults, teams } from "../../db/schema";
@@ -87,6 +87,46 @@ export async function getScheduleOptions() {
 }
 
 export type ScheduleOption = Awaited<ReturnType<typeof getScheduleOptions>>[number];
+
+const normName = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+
+/**
+ * Prefill for "+ Резултат" on a scheduled match.
+ * Returns the existing result's id if the match already has one.
+ */
+export async function getResultPrefill(matchId: string) {
+  const match = await getMatchById(matchId);
+  if (!match) return null;
+  if (match.result) return { existingResultId: match.result.id };
+
+  const allTeams = await db.select({ id: teams.id, name: teams.name, slug: teams.slug }).from(teams);
+  const us = allTeams.find((t) => t.slug === OUR_TEAM_SLUG);
+
+  // 1) a team with the same name
+  let opponentId = allTeams.find((t) => normName(t.name) === normName(match.opponent))?.id;
+
+  // 2) otherwise: the team used in an earlier result linked to a match with this opponent text
+  //    (e.g. schedule says "Инкредибалс", team is "The Incrediballs")
+  if (!opponentId) {
+    const earlier = await db
+      .select({ a: matchResults.teamAId, b: matchResults.teamBId })
+      .from(matchResults)
+      .innerJoin(matches, eq(matches.id, matchResults.matchId))
+      .where(and(isNotNull(matchResults.matchId), eq(matches.opponent, match.opponent)))
+      .limit(1);
+    if (earlier[0]) opponentId = earlier[0].a === us?.id ? earlier[0].b : earlier[0].a;
+  }
+
+  const ourId = us ? String(us.id) : "";
+  const theirId = opponentId ? String(opponentId) : "";
+  return {
+    matchId: match.id,
+    // home team first
+    teamAId: match.home ? ourId : theirId,
+    teamBId: match.home ? theirId : ourId,
+    playedAt: `${match.date}T${match.time ?? "12:00"}`,
+  };
+}
 
 export async function createMatch(input: MatchInput) {
   const [row] = await db.insert(matches).values(input).returning({ id: matches.id });

@@ -1277,3 +1277,12 @@ button.add-cal-btn{font-family:inherit;cursor:pointer}
   font-size:.82rem;font-weight:700;color:var(--orange);text-decoration:none;
 }
 .match-popup-link:hover{text-decoration:underline}
+
+/* ---------- Admin: "+ Резултат" on scheduled matches ---------- */
+a.admin-result-link{
+  display:inline-flex;align-items:center;text-decoration:none;
+  border-style:solid;border-color:var(--orange);color:var(--orange);font-weight:600;
+}
+a.admin-result-link:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+a.admin-result-link.done{border-color:var(--blue);color:var(--charcoal);background:var(--blue-soft)}
+a.admin-result-link.done:hover{background:var(--blue)}

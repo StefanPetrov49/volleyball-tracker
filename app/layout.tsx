@@ -20,7 +20,8 @@ export const metadata: Metadata = {
   applicationName: "Яките пичове",
   keywords: ["волейбол", "Яките пичове", "волейболен отбор", "мачове", "програма", "София"],
   alternates: { canonical: "/" },
-  icons: { icon: "/logo.svg", shortcut: "/logo.svg", apple: "/logo.svg" },
+  icons: { icon: "/logo.svg", shortcut: "/logo.svg", apple: "/apple-icon" },
+  appleWebApp: { capable: true, title: "Яките пичове", statusBarStyle: "default" },
     openGraph: {
     type: "website",
     url: siteUrl,

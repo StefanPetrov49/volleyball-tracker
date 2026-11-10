@@ -1286,3 +1286,35 @@ a.admin-result-link{
 a.admin-result-link:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
 a.admin-result-link.done{border-color:var(--blue);color:var(--charcoal);background:var(--blue-soft)}
 a.admin-result-link.done:hover{background:var(--blue)}
+
+/* ---------- League standings tab (volleymania) ---------- */
+.standings-card{
+  background:#fff;border:1px solid var(--line);border-left:6px solid var(--orange);
+  border-radius:12px;box-shadow:0 2px 8px #0001;padding:14px 16px;
+}
+.standings-loading{color:var(--muted);text-align:center;padding:28px 16px}
+.standings-error p{margin:0 0 12px;color:var(--charcoal)}
+.standings-error-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.standings-error-actions button{border:0;cursor:pointer;font:inherit}
+.standings-error-actions a{color:var(--orange);font-weight:600}
+.standings-title{margin:0 0 10px;font-size:1.05rem}
+.standings-scroll{overflow-x:auto}
+.standings-table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+.standings-table th{
+  padding:6px 8px;text-align:center;font-size:.72rem;letter-spacing:.04em;
+  color:#fff;background:var(--charcoal);cursor:help;
+}
+.standings-table th:first-child{border-radius:8px 0 0 8px}
+.standings-table th:last-child{border-radius:0 8px 8px 0}
+.standings-table td{padding:8px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+.standings-table .st-team{text-align:left;white-space:normal}
+.standings-table .st-points{font-weight:800}
+.standings-table tr.st-ours td{background:var(--orange-soft);font-weight:700}
+.standings-table tr.st-ours td:first-child{box-shadow:inset 4px 0 0 var(--orange)}
+.standings-source{margin:10px 0 0;font-size:.78rem;color:var(--muted)}
+.standings-source a{color:var(--orange);font-weight:600;text-decoration:none}
+@media(max-width:600px){
+  .standings-table .st-wide{display:none}
+  .standings-table{font-size:.82rem}
+  .standings-table td,.standings-table th{padding:6px 5px}
+}

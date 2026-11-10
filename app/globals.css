@@ -478,9 +478,38 @@ body > main{flex:1}
 }
 .nav-menu-item:hover{background:rgba(245,94,30,.1)}
 .users-table{width:100%;border-collapse:collapse;margin-top:12px}
-.users-table th,.users-table td{border:1px solid rgba(0,0,0,.12);padding:8px 10px;text-align:left}
+.users-table th,.users-table td{border:1px solid rgba(0,0,0,.12);padding:8px 10px;text-align:left;vertical-align:middle}
 .users-table th{background:rgba(245,94,30,.08);font-weight:600}
 .users-table tr:nth-child(even){background:rgba(0,0,0,.02)}
+.users-table .users-action button{white-space:nowrap}
+.users-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--blue-soft);color:var(--charcoal)}
+.users-badge.admin{background:var(--orange);color:#fff}
+.users-result{margin:12px 0 16px;border-left-color:var(--orange)}
+.users-result h4{margin:0 0 6px}
+.users-result p{margin:0 0 10px;color:var(--muted);font-size:.9rem}
+.users-password{
+  display:block;margin-bottom:12px;padding:10px 12px;border-radius:8px;background:#f5f5f5;
+  font-size:1.15rem;letter-spacing:.06em;user-select:all;word-break:break-all;
+}
+
+/* Phones: every user becomes a card instead of a too-wide table row */
+@media(max-width:640px){
+  .users-table,.users-table tbody{display:block}
+  .users-table thead{display:none}
+  .users-table tr{
+    display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;
+    margin-bottom:12px;padding:14px 16px;
+    background:#fff !important;border:1px solid var(--line);border-left:6px solid var(--blue);
+    border-radius:12px;box-shadow:0 2px 8px #0001;
+  }
+  .users-table td{border:0;padding:0}
+  .users-table .users-name{font-weight:700;font-size:1.02rem}
+  .users-table .users-role{grid-column:2;grid-row:1;justify-self:end}
+  .users-table .users-username{grid-column:1 / -1;color:var(--muted);font-size:.88rem}
+  .users-table .users-status{grid-column:1 / -1;font-size:.88rem}
+  .users-table .users-action{grid-column:1 / -1;margin-top:8px}
+  .users-table .users-action button{width:100%}
+}
 
 /* ---------- Shared Page Layout ---------- */
 .page-layout{
@@ -1317,4 +1346,99 @@ a.admin-result-link.done:hover{background:var(--blue)}
   .standings-table .st-wide{display:none}
   .standings-table{font-size:.82rem}
   .standings-table td,.standings-table th{padding:6px 5px}
+}
+
+/* ---------- Admin: match form & list ---------- */
+.admin-select{
+  padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;
+  font:inherit;font-size:.95rem;color:var(--charcoal);outline:none;
+}
+.admin-select:focus{border-color:var(--blue)}
+.poll-form-field .admin-select + input{margin-top:6px}
+.admin-hint{font-size:.75rem;color:var(--muted)}
+.admin-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.admin-field{display:flex;flex-direction:column;gap:4px;flex:1 1 120px;min-width:0}
+.admin-field-wide{flex:2 1 180px}
+.admin-field span{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.admin-field input{
+  padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;
+  font:inherit;font-size:.95rem;color:var(--charcoal);outline:none;min-height:40px;
+  width:100%;box-sizing:border-box;
+}
+.admin-field input:focus{border-color:var(--blue)}
+.admin-list-title{margin:0 0 12px;font-size:1rem;color:var(--charcoal)}
+.admin-empty{margin:0;color:var(--muted)}
+.admin-divider{margin:28px 0 16px}
+.poll-card.admin-card-editing{box-shadow:0 0 0 2px var(--orange),0 2px 8px #0001}
+
+/* ---------- Admin hub (/admin) ---------- */
+.admin-home{display:flex;flex-direction:column;gap:26px;max-width:640px}
+.admin-hello{display:flex;flex-direction:column;gap:4px}
+.admin-eyebrow{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1f6f80}
+.admin-hello h1{margin:0;font-size:28px;line-height:1.15}
+.admin-block{display:flex;flex-direction:column;gap:10px}
+.admin-block h2{margin:0;font-size:17px}
+.admin-block-head{display:flex;align-items:center;gap:8px}
+.admin-count{
+  display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 7px;
+  box-sizing:border-box;border-radius:999px;background:var(--charcoal);color:#fff;font-size:13px;font-weight:700;
+}
+.admin-list{
+  display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 2px 8px #0000000f;overflow:hidden;
+}
+.admin-row{
+  display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 14px;
+  color:var(--charcoal);text-decoration:none;border-bottom:1px solid #efeae2;
+}
+.admin-row:last-child{border-bottom:0}
+a.admin-row:hover{background:#fbf9f6}
+.admin-row-icon{display:flex;align-items:center;justify-content:center;flex:0 0 40px;height:40px;border-radius:12px}
+.admin-row-icon.warn{background:var(--orange-soft);color:#c2410c}
+.admin-row-icon.info{background:var(--blue-soft);color:#1f6f80}
+.admin-row-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.admin-row-text strong{font-size:15px}
+.admin-row-text > span{font-size:13px;color:var(--muted)}
+.admin-all-clear{flex-direction:row;align-items:center;gap:12px;padding:16px 14px}
+.admin-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-tile{
+  display:flex;flex-direction:column;justify-content:space-between;gap:14px;min-height:104px;padding:14px;
+  box-sizing:border-box;background:#fff;border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 2px 8px #0000000f;color:var(--charcoal);text-decoration:none;font-size:15px;
+}
+a.admin-tile:hover{border-color:var(--orange)}
+.admin-tile-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:var(--charcoal)}
+.admin-tile-label{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.admin-soon{
+  display:inline-block;padding:2px 8px;border-radius:999px;background:#efeae2;
+  font-size:11px;font-weight:700;color:#5a5e61;vertical-align:middle;
+}
+.is-soon{cursor:default}
+.is-soon .admin-tile-icon{background:#8a8e91}
+.admin-back{
+  display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;
+  border:2px solid var(--charcoal);border-radius:999px;color:var(--charcoal);
+  font-size:15px;font-weight:700;text-decoration:none;
+}
+.admin-back:hover{background:var(--charcoal);color:#fff}
+
+/* ---------- Users admin: new player + actions ---------- */
+.users-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.users-head h3{margin:0}
+.users-error{color:#b42318;margin:10px 0}
+.users-new{margin:14px 0}
+.users-new select.admin-select{width:100%}
+.users-new .poll-form-field input{width:100%;box-sizing:border-box}
+.users-password{white-space:pre-wrap;word-break:normal;overflow-wrap:anywhere;font-family:inherit;font-size:.95rem;line-height:1.5;letter-spacing:0}
+.users-me{font-weight:400;color:var(--muted)}
+.users-buttons{display:flex;flex-wrap:wrap;gap:6px}
+.users-buttons .poll-add-option-btn{white-space:nowrap}
+.poll-add-option-btn.users-danger{color:#b42318}
+.poll-add-option-btn.users-danger:hover{border-color:#b42318;color:#b42318}
+.users-table tr.users-banned td{opacity:.6}
+.users-table tr.users-banned td.users-action{opacity:1}
+@media(max-width:640px){
+  .users-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .users-buttons .poll-add-option-btn:first-child:last-child{grid-column:1 / -1}
+  .users-table tr.users-banned{border-left-color:#b9b5ae}
 }

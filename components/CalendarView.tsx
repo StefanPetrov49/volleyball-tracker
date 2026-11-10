@@ -2,14 +2,17 @@
 import { useMemo, useState } from "react";
 import type { Match } from "@/types/match";
 import CalendarEventWithPopup from "./CalendarEventWithPopup";
+import { nowSofiaLocal } from "@/lib/datetime";
 
 const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function CalendarView({ matches }: { matches: Match[] }) {
-  const first = matches.length ? new Date(matches[0].date) : new Date();
-  const [year, setYear] = useState(first.getFullYear());
-  const [month, setMonth] = useState(first.getMonth());
+  // Today's date in Sofia time ("YYYY-MM-DD"), so server render and browser agree
+  const todayKey = nowSofiaLocal().slice(0, 10);
+  // Always open on the current month
+  const [year, setYear] = useState(() => Number(todayKey.slice(0, 4)));
+  const [month, setMonth] = useState(() => Number(todayKey.slice(5, 7)) - 1);
 
   const byDate = useMemo(() => {
     const map: Record<string, Match[]> = {};
@@ -29,8 +32,6 @@ export default function CalendarView({ matches }: { matches: Match[] }) {
     setYear(nd.getFullYear());
     setMonth(nd.getMonth());
   };
-
-  const todayKey = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="calendar">

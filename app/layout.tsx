@@ -21,20 +21,20 @@ export const metadata: Metadata = {
   keywords: ["волейбол", "Яките пичове", "волейболен отбор", "мачове", "програма", "София"],
   alternates: { canonical: "/" },
   icons: { icon: "/logo.svg", shortcut: "/logo.svg", apple: "/logo.svg" },
-  openGraph: {
+    openGraph: {
     type: "website",
     url: siteUrl,
     siteName: "Яките пичове",
     title,
     description,
     locale: "bg_BG",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Яките пичове – лого" }],
+    images: [{ url: "/thumbnail.png", width: 1200, height: 630, alt: "Отборът Яките пичове" }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/og-image.png"],
+    images: ["/thumbnail.png"],
   },
   robots: { index: true, follow: true },
 };

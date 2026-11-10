@@ -1,4 +1,5 @@
 import type { Match } from "@/types/match";
+import AddToCalendar from "./AddToCalendar";
 
 type Props = { match: Match; index: number; isNext: boolean; isPast: boolean };
 
@@ -19,6 +20,7 @@ export default function MatchTile({ match, index, isNext, isPast }: Props) {
         <p>🕒 {match.time?.trim() || "Няма час"}</p>
         <p>📍 {match.location?.trim() || "Няма зала"}</p>
         <span className={`badge ${match.home ? "home" : "away"}`}>{match.home ? "Домакини" : "Гости"}</span>
+        {!isPast && <AddToCalendar match={match} />}
       </div>
     </article>
   );

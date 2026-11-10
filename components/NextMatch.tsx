@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Match } from "@/types/match";
+import AddToCalendar from "./AddToCalendar";
 
 const toDate = (m: Match) => new Date(`${m.date}T${m.time?.trim() || "23:59"}`);
 
@@ -45,6 +46,7 @@ export default function NextMatch({ matches }: { matches: Match[] }) {
                     </div>
                 ))}
             </div>
+            <AddToCalendar match={next} variant="dark" />
         </div>
     );
 }

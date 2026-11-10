@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiUser } from "@/lib/session";
 import { updatePoll } from "@/lib/services/polls";
+import { logActivity } from "@/lib/services/activity";
 import { pollUpdateInput } from "@/lib/validation/poll";
 
 export async function PATCH(
@@ -53,5 +54,6 @@ export async function PATCH(
     );
   }
 
+  await logActivity(user, "poll.updated", `редактира анкетата „${parsedBody.data.question}“`, "/?view=polls");
   return NextResponse.json({ ok: true });
 }

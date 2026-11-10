@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { user } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 import { log } from "@/lib/logger";
+import { logActivity } from "@/lib/services/activity";
 
 // Same rules as scripts/create-user.ts
 const usernameSchema = z
@@ -60,5 +61,6 @@ export async function createPlayer(raw: { name: string; username: string; role: 
   }
 
   log.info("users.created", { actorUserId: admin.user.id, username, role });
+  await logActivity(admin.user, "user.created", `създаде профил на ${name} (${username})${role === "admin" ? " като админ" : ""}`, "/admin/users");
   return { ok: true, name, username, password };
 }

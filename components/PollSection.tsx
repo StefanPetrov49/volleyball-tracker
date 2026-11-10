@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "@/lib/toast";
 import type { Poll } from "@/types/poll";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -163,6 +164,7 @@ function CreatePollForm({ onCreated }: { onCreated: () => void }) {
       return;
     }
 
+    toast("Анкетата е създадена");
     onCreated();
     setQuestion("Кога играем?");
     setOptions([emptyOption(), emptyOption()]);
@@ -309,6 +311,7 @@ function EditPollForm({
       return;
     }
 
+    toast("Анкетата е обновена");
     onSaved();
   };
 
@@ -378,31 +381,60 @@ function EditPollForm({
   );
 }
 
+/** What the poll looks like right after I tap an option (before the server answers). */
+function applyMyToggle(poll: Poll, optionId: string, myName: string): Poll {
+  const wasMine = poll.myVotes.includes(optionId);
+  const myVotes = wasMine ? poll.myVotes.filter((id) => id !== optionId) : [...poll.myVotes, optionId];
+  const options = poll.options.map((o) => {
+    if (o.id !== optionId) return o;
+    const voters = wasMine ? o.voters.filter((n, i) => i !== o.voters.indexOf(myName)) : [...o.voters, myName];
+    return { ...o, votes: voters.length, voters };
+  });
+  const others = (poll.notVoted ?? []).filter((n) => n !== myName);
+  return { ...poll, myVotes, options, notVoted: myVotes.length === 0 ? [...others, myName] : others };
+}
+
 function PollCard({
   poll,
   canEdit,
-  onChanged,
+  myName,
+  onUpdate,
   onEdit,
 }: {
   poll: Poll;
   canEdit: boolean;
-  onChanged: () => void;
+  myName: string;
+  onUpdate: (poll: Poll) => void;
   onEdit: () => void;
 }) {
+  const [voteError, setVoteError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const notVoted = poll.notVoted ?? [];
   const hasVoted = poll.myVotes.length > 0;
   const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0);
   const maxVotes = Math.max(...poll.options.map((o) => o.votes));
 
+  // Show the vote immediately; then take the server's version of this one poll
   const toggle = async (optionId: string) => {
-    const response = await fetch(`/api/polls/${poll.id}/vote`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ optionId }),
-    });
-
-    if (response.ok) {
-      onChanged();
+    if (busy) return;
+    const before = poll;
+    setBusy(true);
+    setVoteError(null);
+    onUpdate(applyMyToggle(poll, optionId, myName));
+    try {
+      const response = await fetch(`/api/polls/${poll.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ optionId }),
+      });
+      if (!response.ok) throw new Error();
+      const body = (await response.json()) as { poll?: Poll | null };
+      if (body.poll) onUpdate(body.poll);
+    } catch {
+      onUpdate(before);
+      setVoteError("Гласът не беше записан. Опитай пак.");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -459,7 +491,7 @@ function PollCard({
 
               <div className="poll-vote-right">
                 {hasVoted && <span className="poll-pct">{percentage}%</span>}
-                <span className="poll-count">{option.votes} гласа</span>
+                <span className="poll-count">{option.votes} {option.votes === 1 ? "глас" : "гласа"}</span>
               </div>
 
               {hasVoted && (
@@ -468,6 +500,8 @@ function PollCard({
             </button>
           );
         })}
+
+        {voteError && <p className="poll-vote-error" role="alert">{voteError}</p>}
 
         {notVoted.length > 0 && (
           <p className="poll-not-voted">
@@ -483,13 +517,26 @@ function PollCard({
   );
 }
 
+const PAGE_SIZE = 5;
+
+type PollPage = { polls: Poll[]; hasMore: boolean };
+
+async function fetchPollPage(offset: number): Promise<PollPage | null> {
+  const response = await fetch(`/api/polls?offset=${offset}&limit=${PAGE_SIZE}`);
+  return response.ok ? ((await response.json()) as PollPage) : null;
+}
+
 export default function PollSection() {
-  const { userId, isPending } = useAuth();
+  const { userId, username, isPending } = useAuth();
 
   const [polls, setPolls] = useState<Poll[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [version, setVersion] = useState(0);
   const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
 
+  // after creating / editing a poll: start again from the newest page
   const reload = () => {
     setEditingPoll(null);
     setVersion((current) => current + 1);
@@ -500,18 +547,32 @@ export default function PollSection() {
 
     let cancelled = false;
 
-    (async () => {
-      const response = await fetch("/api/polls");
-
-      if (response.ok && !cancelled) {
-        setPolls(await response.json());
+    fetchPollPage(0).then((page) => {
+      if (cancelled) return;
+      if (page) {
+        setPolls(page.polls);
+        setHasMore(page.hasMore);
       }
-    })();
+      setLoading(false);
+    });
 
     return () => {
       cancelled = true;
     };
   }, [userId, version]);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    const page = await fetchPollPage(polls.length);
+    setLoadingMore(false);
+    if (!page) return;
+    // skip any poll we already show (e.g. if a new poll was created meanwhile)
+    setPolls((current) => [...current, ...page.polls.filter((p) => !current.some((c) => c.id === p.id))]);
+    setHasMore(page.hasMore);
+  };
+
+  const replacePoll = (updated: Poll) =>
+    setPolls((current) => current.map((p) => (p.id === updated.id ? updated : p)));
 
   if (isPending) {
     return null;
@@ -537,6 +598,8 @@ export default function PollSection() {
         />
       )}
 
+      {loading && <p className="poll-loading">Зареждане на анкетите…</p>}
+
       {polls.length > 0 && (
         <div className="poll-cards">
           {polls.map((poll) => (
@@ -544,11 +607,18 @@ export default function PollSection() {
               key={poll.id}
               poll={poll}
               canEdit={poll.createdBy === userId}
-              onChanged={reload}
+              myName={username ?? "Ти"}
+              onUpdate={replacePoll}
               onEdit={() => setEditingPoll(poll)}
             />
           ))}
         </div>
+      )}
+
+      {hasMore && (
+        <button type="button" className="poll-load-more" onClick={loadMore} disabled={loadingMore}>
+          {loadingMore ? "Зареждане…" : "Покажи по-стари анкети"}
+        </button>
       )}
     </section>
   );

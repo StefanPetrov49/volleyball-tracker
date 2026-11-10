@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { createPlayer } from "@/app/admin/users/actions";
+import { toast } from "@/lib/toast";
 
 type User = {
     id: string;
@@ -29,7 +30,7 @@ function generatePassword() {
 const displayName = (u: { name: string; username?: string | null }) =>
     u.username ? `${u.name} (${u.username})` : u.name;
 
-// "Ана Илиева" → "ana.ilieva" (official Bulgarian transliteration), only a suggestion
+// "Стефан Петров" → "stefan.petrov" (official Bulgarian transliteration), only a suggestion
 const TRANSLIT: Record<string, string> = {
     а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l",
     м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch",
@@ -134,6 +135,7 @@ export default function UsersAdmin({ currentUserId, openNewForm = false }: Props
         setBusyId(null);
         if (error) return setError(error.message ?? "Неуспешна смяна на паролата.");
         setUsers((list) => list.map((x) => (x.id === u.id ? { ...x, mustChangePassword: true } : x)));
+        toast(`Новата парола за ${u.name} е готова`);
         showResult({ kind: "reset", name: u.name, username: u.username ?? null, password });
     };
 
@@ -148,6 +150,7 @@ export default function UsersAdmin({ currentUserId, openNewForm = false }: Props
         setBusyId(null);
         if (error) return setError(error.message ?? "Неуспешна промяна на ролята.");
         setUsers((list) => list.map((x) => (x.id === u.id ? { ...x, role: makeAdmin ? "admin" : "user" } : x)));
+        toast(makeAdmin ? `${u.name} вече е админ` : `${u.name} вече не е админ`);
     };
 
     const toggleActive = async (u: User) => {
@@ -166,6 +169,7 @@ export default function UsersAdmin({ currentUserId, openNewForm = false }: Props
             : await authClient.admin.banUser({ userId: u.id, banReason: "Деактивиран от админ" });
         setBusyId(null);
         if (error) return setError(error.message ?? "Неуспешна промяна.");
+        toast(u.banned ? `${u.name} е активиран отново` : `${u.name} е деактивиран`);
         await loadUsers();
     };
 
@@ -180,6 +184,7 @@ export default function UsersAdmin({ currentUserId, openNewForm = false }: Props
         setNewForm(emptyNew);
         setUsernameTouched(false);
         await loadUsers();
+        toast(`Профилът на ${res.name} е създаден`);
         showResult({ kind: "created", name: res.name, username: res.username, password: res.password });
     };
 
@@ -344,7 +349,7 @@ export default function UsersAdmin({ currentUserId, openNewForm = false }: Props
                                         </span>
                                     </td>
                                     <td className="users-status">
-                                        {u.banned ? "⛔ Деактивиран" : u.mustChangePassword ? "⏳ Чака да смени паролата" : "Активен"}
+                                        {u.banned ? "⛔ Деактивиран" : u.mustChangePassword ? "⏳ Чака да смени паролата" : "✅ Активен"}
                                     </td>
                                     <td className="users-action">
                                         <div className="users-buttons">

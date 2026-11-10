@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NavUser from "@/components/NavUser";
+import Toaster from "@/components/Toaster";
 
 function InstagramIcon() {
   return (
@@ -14,6 +15,7 @@ function InstagramIcon() {
 
 export default function Navbar() {
   return (
+    <>
     <nav className="topbar">
       <div className="topbar-inner">
         <Link href="/" className="brand">
@@ -36,5 +38,8 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+    {/* outside <nav>: the bar's backdrop-filter would otherwise trap the fixed banners inside it */}
+    <Toaster />
+    </>
   );
 }

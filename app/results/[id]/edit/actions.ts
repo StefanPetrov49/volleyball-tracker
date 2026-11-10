@@ -7,13 +7,15 @@ import { db } from "@/lib/db";
 import { matchResults } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 import { parseResultForm, resultSaveError, type ResultFormState } from "@/lib/result-input";
+import { logActivity, resultSummary } from "@/lib/services/activity";
+import { setFlash } from "@/lib/flash";
 
 export async function updateMatchResult(
   id: number,
   _prevState: ResultFormState,
   formData: FormData,
 ): Promise<ResultFormState> {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   if (!Number.isInteger(id)) {
     return { error: "Невалиден мач." };
@@ -37,19 +39,28 @@ export async function updateMatchResult(
     return { error: "Мачът не е намерен." };
   }
 
+  const s = await resultSummary(parsed.data);
+  await logActivity(session.user, "result.updated", s.finished ? `обнови резултата ${s.text}` : `редактира мача ${s.text}`, `/results/${id}`);
+
   revalidatePath("/");
   revalidatePath("/results");
   revalidatePath(`/results/${id}`);
+  await setFlash(s.finished ? "Резултатът е обновен" : "Промените са запазени");
   redirect(`/results/${id}`);
 }
 
 export async function deleteMatchResult(id: number) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   if (Number.isInteger(id)) {
-    await db.delete(matchResults).where(eq(matchResults.id, id));
+    const [deleted] = await db.delete(matchResults).where(eq(matchResults.id, id)).returning();
+    if (deleted) {
+      const s = await resultSummary(deleted);
+      await logActivity(session.user, "result.deleted", `изтри мача ${s.text}`, "/results");
+    }
   }
 
   revalidatePath("/results");
+  await setFlash("Мачът е изтрит");
   redirect("/results");
 }

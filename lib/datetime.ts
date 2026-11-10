@@ -101,3 +101,17 @@ export const monthShortBg = (monthIndex: number) => BG_MONTHS_SHORT[monthIndex];
 export function matchStartMs(date: string, time: string | null): number {
   return sofiaLocalToDate(`${date}T${time?.trim() || "23:59"}`)?.getTime() ?? NaN;
 }
+
+/** "току-що", "преди 5 мин", "днес 21:14", "вчера 21:14", "20 ное 21:14" (Sofia time) */
+export function formatActivityTime(date: Date, now: number = Date.now()): string {
+  const diffMin = Math.floor((now - date.getTime()) / 60_000);
+  if (diffMin < 1) return "току-що";
+  if (diffMin < 60) return `преди ${diffMin} мин`;
+
+  const day = (d: Date) => dateToSofiaLocal(d).slice(0, 10);
+  const time = dateToSofiaLocal(date).slice(11, 16);
+  if (day(date) === day(new Date(now))) return `днес ${time}`;
+  if (day(date) === day(new Date(now - 86_400_000))) return `вчера ${time}`;
+  const [, m, d] = day(date).split("-").map(Number);
+  return `${d} ${monthShortBg(m - 1)} ${time}`;
+}

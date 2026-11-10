@@ -352,7 +352,7 @@ body > main{flex:1}
 .poll-loser{opacity:.65}
 .poll-vote-label{display:flex;flex-direction:column;gap:2px;z-index:1}
 .poll-vote-location{font-size:.78rem;color:var(--muted)}
-.poll-voters{font-size:.75rem;color:var(--blue);font-weight:600}
+.poll-voters{font-size:.75rem;color:#1f6f80;font-weight:600}
 .poll-vote-right{display:flex;gap:10px;align-items:center;z-index:1;white-space:nowrap}
 .poll-pct{font-weight:700;color:var(--charcoal)}
 .poll-count{color:var(--muted);font-size:.8rem}
@@ -1442,3 +1442,51 @@ a.admin-tile:hover{border-color:var(--orange)}
   .users-buttons .poll-add-option-btn:first-child:last-child{grid-column:1 / -1}
   .users-table tr.users-banned{border-left-color:#b9b5ae}
 }
+
+/* ---------- Activity log ---------- */
+.admin-block-head-split{justify-content:space-between}
+.admin-more{font-size:14px;font-weight:700;color:#c2410c;text-decoration:none}
+.admin-more:hover{text-decoration:underline}
+.activity-list{list-style:none;margin:0;padding:0}
+.activity-list li{border-bottom:1px solid #efeae2}
+.activity-list li:last-child{border-bottom:0}
+.activity-row{display:flex;flex-direction:column;gap:2px;padding:10px 14px;color:var(--charcoal);text-decoration:none}
+a.activity-row:hover{background:#fbf9f6}
+.activity-text{font-size:14px;line-height:1.35}
+.activity-time{font-size:12px;color:var(--muted)}
+.activity-empty{margin:0;padding:14px;color:var(--muted);font-size:14px}
+.activity-note{margin:0;font-size:12px;color:var(--muted)}
+
+/* ---------- Polls: paging + vote feedback ---------- */
+.poll-loading{color:var(--muted)}
+.poll-load-more{
+  display:block;width:100%;margin-top:16px;min-height:48px;
+  border:2px solid var(--charcoal);border-radius:999px;background:transparent;
+  font:inherit;font-weight:700;color:var(--charcoal);cursor:pointer;
+}
+.poll-load-more:hover{background:var(--charcoal);color:#fff}
+.poll-load-more:disabled{opacity:.6;cursor:wait}
+.poll-vote-error{margin:4px 0;color:#b42318;font-size:.88rem}
+
+/* ---------- Banners ("✓ Мачът е добавен") ---------- */
+.toaster{
+  position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  z-index:10000;display:flex;flex-direction:column;align-items:center;gap:8px;
+  width:max-content;max-width:calc(100vw - 32px);pointer-events:none;
+}
+.toast{
+  pointer-events:auto;display:flex;align-items:center;gap:10px;
+  padding:12px 18px;border:0;border-radius:999px;
+  background:var(--charcoal);color:#fff;box-shadow:0 8px 24px #0000004d;
+  font:inherit;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;
+  animation:toast-in .22s ease-out;
+}
+.toast-icon{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;height:22px;
+  border-radius:999px;font-size:.8rem;font-weight:800;
+}
+.toast-success .toast-icon{background:var(--blue);color:var(--charcoal)}
+.toast-error{background:#b42318}
+.toast-error .toast-icon{background:#fff;color:#b42318}
+@keyframes toast-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.toast{animation:none}}

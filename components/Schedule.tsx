@@ -6,9 +6,19 @@ import CalendarView from "./CalendarView";
 import TilesView from "./TilesView";
 import PollSection from "./PollSection";
 import SubscribeCalendar from "./SubscribeCalendar";
+import LeagueStandings from "./LeagueStandings";
 
-export default function Schedule({ matches: initial }: { matches: Match[] }) {
-  const [view, setView] = useState<"calendar" | "tiles" | "polls">("calendar");
+export type ScheduleView = "calendar" | "tiles" | "polls" | "standings";
+
+export default function Schedule({
+  matches: initial,
+  initialView = "calendar",
+}: {
+  matches: Match[];
+  /** e.g. the footer's "Класиране" link opens /?view=standings */
+  initialView?: ScheduleView;
+}) {
+  const [view, setView] = useState<ScheduleView>(initialView);
   const [matches, setMatches] = useState<Match[]>(initial);
 
   const refreshMatches = useCallback(() => {
@@ -32,10 +42,12 @@ export default function Schedule({ matches: initial }: { matches: Match[] }) {
         <Link href="/results" className="tab-link">
           Резултати
         </Link>
+        <button role="tab" aria-selected={view === "standings"} className={view === "standings" ? "active" : ""} onClick={() => setView("standings")}>Класиране</button>
       </div>
       {view === "calendar" && <CalendarView matches={matches} />}
       {view === "tiles" && <TilesView matches={matches} />}
       {view === "polls" && <PollSection />}
+      {view === "standings" && <LeagueStandings />}
       {view === "tiles" && <SubscribeCalendar />}
     </section>
   );

@@ -13,6 +13,13 @@ const columns = [
   },
 ];
 
+// Footer labels that already have a page. The others are still placeholders.
+const hrefs: Record<string, string> = {
+  Програма: "/",
+  Резултати: "/results",
+  Класиране: "/?view=standings",
+};
+
 export default function Footer() {
   return (
     <footer className="footer">
@@ -38,7 +45,7 @@ export default function Footer() {
             <ul>
               {col.links.map((label) => (
                 <li key={label}>
-                  <a href="#">{label}</a>
+                  <a href={hrefs[label] ?? "#"}>{label}</a>
                 </li>
               ))}
             </ul>

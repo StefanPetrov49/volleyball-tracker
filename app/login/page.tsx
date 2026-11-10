@@ -22,10 +22,16 @@ export default function LoginPage() {
 
     if (error) {
       setPending(false);
-      setError("Грешно потребителско име или парола.");
+      setError(
+        error.status === 429
+          ? "Твърде много опити. Изчакай няколко минути и опитай пак."
+          : "Грешно потребителско име или парола.",
+      );
       return;
     }
 
+    // Full reload on purpose: refreshes the login state in every component
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign("/");
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const FALLBACK_LOGO = "/teams/default.png";
 
@@ -16,11 +16,10 @@ export default function TeamLogo({
   alt,
   className,
 }: TeamLogoProps) {
-  const [imageSrc, setImageSrc] = useState(src || FALLBACK_LOGO);
-
-  useEffect(() => {
-    setImageSrc(src || FALLBACK_LOGO);
-  }, [src]);
+  // Remember which src failed to load instead of copying src into state:
+  // a new src is tried automatically, without an extra render.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const imageSrc = src && src !== failedSrc ? src : FALLBACK_LOGO;
 
   return (
     <Image
@@ -30,9 +29,7 @@ export default function TeamLogo({
       height={128}
       className={className}
       onError={() => {
-        if (imageSrc !== FALLBACK_LOGO) {
-          setImageSrc(FALLBACK_LOGO);
-        }
+        if (imageSrc !== FALLBACK_LOGO) setFailedSrc(imageSrc);
       }}
     />
   );

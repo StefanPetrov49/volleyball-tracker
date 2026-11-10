@@ -17,6 +17,8 @@ export default function Navbar() {
     <nav className="topbar">
       <div className="topbar-inner">
         <Link href="/" className="brand">
+          {/* SVG logo: next/image wouldn't optimise it */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="Яките пичове logo" className="brand-logo" />
         </Link>
         <div className="topbar-right">

@@ -1,8 +1,15 @@
 import type { Match } from "@/types/match";
+import AddToCalendar from "./AddToCalendar";
 
-type Props = { match: Match };
+type Props = {
+  match: Match;
+  /** when set, shows a × button (pinned popup) */
+  onClose?: () => void;
+  /** show the Google / Apple calendar buttons */
+  showCalendarButtons?: boolean;
+};
 
-export default function MatchPopup({ match }: Props) {
+export default function MatchPopup({ match, onClose, showCalendarButtons = false }: Props) {
   const d = new Date(match.date);
   const fullDate = d.toLocaleDateString("bg-BG", {
     weekday: "long",
@@ -12,7 +19,12 @@ export default function MatchPopup({ match }: Props) {
   });
 
   return (
-    <div className="match-popup">
+    <div className={`match-popup ${onClose ? "match-popup-pinned" : ""}`}>
+      {onClose && (
+        <button type="button" className="match-popup-close" onClick={onClose} aria-label="Затвори">
+          ×
+        </button>
+      )}
       <div className="match-popup-header">
         <div className="match-popup-date-block">
           <span className="match-popup-month">{d.toLocaleString("en", { month: "short" })}</span>
@@ -31,6 +43,7 @@ export default function MatchPopup({ match }: Props) {
         <li><span className="match-popup-icon">🕒</span>{match.time?.trim() || "Няма час"}</li>
         <li><span className="match-popup-icon">📍</span>{match.location?.trim() || "Няма зала"}</li>
       </ul>
+      {showCalendarButtons && <AddToCalendar match={match} />}
     </div>
   );
 }

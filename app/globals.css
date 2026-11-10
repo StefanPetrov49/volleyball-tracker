@@ -1187,3 +1187,41 @@ body > main{flex:1}
   .live-banner{justify-content:center;text-align:center}
   .live-banner-title{flex-basis:100%}
 }
+
+/* ---------- Add to calendar ---------- */
+.add-cal{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;justify-content:center}
+.add-cal-btn{
+  display:inline-flex;align-items:center;
+  padding:6px 14px;border-radius:999px;
+  font-size:.8rem;font-weight:600;text-decoration:none;white-space:nowrap;
+  transition:background .2s,border-color .2s,color .2s,transform .2s;
+}
+.add-cal-btn:hover{transform:translateY(-1px)}
+.add-cal-dark .add-cal-btn{border:1px solid #ffffff44;background:#ffffff14;color:#fff}
+.add-cal-dark .add-cal-btn:hover{background:var(--orange);border-color:var(--orange)}
+.add-cal-light{justify-content:flex-start;margin-top:12px;gap:6px}
+.add-cal-light .add-cal-btn{padding:4px 10px;font-size:.72rem;border:1.5px solid var(--charcoal);color:var(--charcoal);background:transparent}
+.add-cal-light .add-cal-btn:hover{background:var(--orange);border-color:var(--orange);color:#fff}
+
+/* ---------- Calendar popup: tappable ---------- */
+button.cal-event{
+  display:block;width:100%;
+  border:0;text-align:left;font:inherit;font-weight:600;
+  cursor:pointer;
+}
+button.cal-event:hover,button.cal-event[aria-expanded="true"]{filter:brightness(1.08)}
+button.cal-event:focus-visible{outline:2px solid var(--charcoal);outline-offset:1px}
+.match-popup{position:relative;box-sizing:border-box;width:100%}
+.match-popup-pinned .match-popup-header{padding-right:24px}
+.match-popup-close{
+  position:absolute;top:6px;right:8px;
+  width:28px;height:28px;border:0;border-radius:999px;
+  background:transparent;color:var(--muted);
+  font-size:1.3rem;line-height:1;cursor:pointer;
+}
+.match-popup-close:hover{background:var(--blue-soft);color:var(--charcoal)}
+.match-popup .add-cal{margin-top:12px}
+.match-popup .add-cal-btn{flex:1 1 100%;justify-content:center}
+@media(max-width:600px){
+  .add-cal-dark .add-cal-btn{padding:6px 10px;font-size:.74rem}
+}

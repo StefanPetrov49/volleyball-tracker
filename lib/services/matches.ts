@@ -6,16 +6,23 @@ import { MatchInput } from "../validation/match";
 
 const hhmm = (t: string | null) => (t ? t.slice(0, 5) : null);
 
+const toMatch = (r: typeof matches.$inferSelect): Match => ({
+  id: r.id,
+  date: r.date,
+  time: hhmm(r.time),
+  opponent: r.opponent,
+  location: r.location,
+  home: r.home,
+});
+
 export async function getMatches(): Promise<Match[]> {
   const rows = await db.select().from(matches).orderBy(asc(matches.date), asc(matches.time));
-  return rows.map((r) => ({
-    id: r.id,
-    date: r.date,
-    time: hhmm(r.time),
-    opponent: r.opponent,
-    location: r.location,
-    home: r.home,
-  }));
+  return rows.map(toMatch);
+}
+
+export async function getMatchById(id: string): Promise<Match | null> {
+  const [row] = await db.select().from(matches).where(eq(matches.id, id)).limit(1);
+  return row ? toMatch(row) : null;
 }
 
 export async function createMatch(input: MatchInput) {

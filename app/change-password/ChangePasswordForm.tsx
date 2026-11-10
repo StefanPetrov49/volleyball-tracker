@@ -21,6 +21,8 @@ export default function ChangePasswordForm() {
       setError(res.error);
       return;
     }
+    // Full reload on purpose: refreshes the login state in every component
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign("/");
   }
 

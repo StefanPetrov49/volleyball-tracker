@@ -18,6 +18,8 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
+          {/* SVG logo: next/image wouldn't optimise it */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="Яките пичове" className="footer-logo" />
           <p>Волейболен отбор от София. Заедно на терена, заедно извън него.</p>
           <a

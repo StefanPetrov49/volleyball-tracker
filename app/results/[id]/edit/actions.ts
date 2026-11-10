@@ -43,7 +43,7 @@ export async function updateMatchResult(
   redirect(`/results/${id}`);
 }
 
-export async function deleteMatchResult(id: number, _formData: FormData) {
+export async function deleteMatchResult(id: number) {
   await requireAdmin();
 
   if (Number.isInteger(id)) {

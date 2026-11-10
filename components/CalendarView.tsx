@@ -27,6 +27,14 @@ export default function CalendarView({ matches }: { matches: Match[] }) {
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
+  const todayYear = Number(todayKey.slice(0, 4));
+  const todayMonth = Number(todayKey.slice(5, 7)) - 1;
+  const onCurrentMonth = year === todayYear && month === todayMonth;
+  const goToday = () => {
+    setYear(todayYear);
+    setMonth(todayMonth);
+  };
+
   const shift = (d: number) => {
     const nd = new Date(year, month + d, 1);
     setYear(nd.getFullYear());
@@ -36,20 +44,28 @@ export default function CalendarView({ matches }: { matches: Match[] }) {
   return (
     <div className="calendar">
       <div className="cal-head">
-        <button onClick={() => shift(-1)} aria-label="Previous month">‹</button>
-        <h2>{new Date(year, month).toLocaleString("bg", { month: "long", year: "numeric" })}</h2>
-        <button onClick={() => shift(1)} aria-label="Next month">›</button>
+        <button onClick={() => shift(-1)} aria-label="Предишен месец">‹</button>
+        <div className="cal-title">
+          <h2>{new Date(year, month).toLocaleString("bg", { month: "long", year: "numeric" })}</h2>
+          {!onCurrentMonth && (
+            <button type="button" className="cal-today-btn" onClick={goToday}>
+              Днес
+            </button>
+          )}
+        </div>
+        <button onClick={() => shift(1)} aria-label="Следващ месец">›</button>
       </div>
       <div className="cal-grid">
         {DAYS.map((d) => <div key={d} className="cal-dow">{d}</div>)}
         {cells.map((day, i) => {
           const key = day ? `${year}-${pad(month + 1)}-${pad(day)}` : "";
           const ms = day ? byDate[key] ?? [] : [];
+          const past = day !== null && key < todayKey; // "YYYY-MM-DD" strings compare by date
           return (
-            <div key={i} className={`cal-cell ${day ? "" : "empty"} ${ms.length ? "has-match" : ""} ${key === todayKey ? "today" : ""}`}>
+            <div key={i} className={`cal-cell ${day ? "" : "empty"} ${ms.length ? "has-match" : ""} ${past ? "past" : ""} ${key === todayKey ? "today" : ""}`}>
               {day && <span className="cal-day">{day}</span>}
               {ms.map((m) => (
-                <CalendarEventWithPopup key={m.id} match={m} />
+                <CalendarEventWithPopup key={m.id} match={m} past={past} />
               ))}
             </div>
           );

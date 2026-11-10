@@ -16,7 +16,23 @@ export type ParsedResult = {
   sets: { a: number; b: number }[];
   videoUrl: string | null;
   playedAt: Date;
+  matchId: string | null;
 };
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Postgres error code from a (possibly drizzle-wrapped) error. */
+function pgCode(e: unknown): string | undefined {
+  const err = e as { code?: string; cause?: { code?: string } } | null;
+  return err?.code ?? err?.cause?.code;
+}
+
+/** Turns DB errors from saving a result into a form message, or rethrows. */
+export function resultSaveError(e: unknown): ResultFormState {
+  if (pgCode(e) === "23505") return { error: "Този мач от графика вече има резултат." };
+  if (pgCode(e) === "23503") return { error: "Избраният мач от графика не съществува." };
+  throw e;
+}
 
 export async function parseResultForm(
   formData: FormData,
@@ -25,6 +41,7 @@ export async function parseResultForm(
   const teamBId = Number(formData.get("teamBId"));
   const videoRaw = formData.get("videoUrl")?.toString().trim() || "";
   const playedAtRaw = formData.get("playedAt")?.toString() ?? "";
+  const matchIdRaw = formData.get("matchId")?.toString().trim() || "";
 
   if (!Number.isInteger(teamAId) || !Number.isInteger(teamBId)) {
     return { error: "Избери и двата отбора." };
@@ -47,6 +64,11 @@ export async function parseResultForm(
   if (!playedAt) {
     return { error: "Избери дата и час на мача." };
   }
+
+  if (matchIdRaw && !UUID_RE.test(matchIdRaw)) {
+    return { error: "Невалиден мач от графика." };
+  }
+  const matchId = matchIdRaw || null;
 
   let videoUrl: string | null = null;
   if (videoRaw) {
@@ -90,6 +112,6 @@ export async function parseResultForm(
   }
 
   return {
-    data: { teamAId, teamBId, setsWonA, setsWonB, sets, videoUrl, playedAt },
+    data: { teamAId, teamBId, setsWonA, setsWonB, sets, videoUrl, playedAt, matchId },
   };
 }

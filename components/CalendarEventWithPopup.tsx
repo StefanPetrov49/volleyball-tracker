@@ -20,7 +20,22 @@ const isUpcoming = (m: Match) =>
  * - Click / tap / Enter: opens a pinned popup with add-to-calendar buttons.
  *   Closes on outside tap, Escape, the × button, or tapping the event again.
  */
-export default function CalendarEventWithPopup({ match }: { match: Match }) {
+/** Chip text + colour: upcoming → orange, past → grey, finished → score (blue win / dark loss) */
+function chip(match: Match, past: boolean) {
+  const r = match.result;
+  if (r?.finished) {
+    const won = r.us > r.them;
+    return { text: `${r.us}:${r.them} vs ${match.opponent}`, cls: won ? "cal-event-win" : "cal-event-loss", won };
+  }
+  return {
+    text: `${match.time ? `${match.time} ` : ""}vs ${match.opponent}`,
+    cls: past ? "cal-event-past" : "",
+    won: null,
+  };
+}
+
+export default function CalendarEventWithPopup({ match, past = false }: { match: Match; past?: boolean }) {
+  const { text, cls, won } = chip(match, past);
   const [pos, setPos] = useState<Pos | null>(null);
   const [pinned, setPinned] = useState(false);
   const [upcoming, setUpcoming] = useState(false);
@@ -100,14 +115,15 @@ export default function CalendarEventWithPopup({ match }: { match: Match }) {
       <button
         ref={triggerRef}
         type="button"
-        className="cal-event"
+        className={`cal-event ${cls}`}
         onClick={onClick}
         onPointerEnter={onPointerEnter}
         onPointerLeave={onPointerLeave}
         aria-haspopup="dialog"
         aria-expanded={pinned}
+        aria-label={won === null ? undefined : `${text} – ${won ? "победа" : "загуба"}`}
       >
-        {match.time ? `${match.time} ` : ""}vs {match.opponent}
+        {text}
       </button>
       {pos &&
         createPortal(

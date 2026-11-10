@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/session";
 import { getTeams } from "@/lib/teams";
 import { getMatchResult } from "@/lib/results";
 import { dateToSofiaLocal } from "@/lib/datetime";
+import { getScheduleOptions } from "@/lib/services/matches";
 import DeleteResultButton from "./DeleteResultButton";
 
 export const dynamic = "force-dynamic";
@@ -17,9 +18,10 @@ export default async function EditResultPage({ params }: PageProps) {
   await requireAdmin();
 
   const { id } = await params;
-  const [result, teams] = await Promise.all([
+  const [result, teams, scheduleOptions] = await Promise.all([
     getMatchResult(Number(id)),
     getTeams(),
+    getScheduleOptions(),
   ]);
 
   if (!result) notFound();
@@ -39,6 +41,8 @@ export default async function EditResultPage({ params }: PageProps) {
 
       <ResultForm
         teams={teams}
+        scheduleOptions={scheduleOptions}
+        currentResultId={result.id}
         action={updateMatchResult.bind(null, result.id)}
         submitLabel="Запази промените"
         initial={{
@@ -46,6 +50,7 @@ export default async function EditResultPage({ params }: PageProps) {
           teamBId: String(result.teamBId),
           playedAt: dateToSofiaLocal(result.playedAt),
           videoUrl: result.videoUrl ?? "",
+          matchId: result.matchId ?? "",
           sets: result.sets.map((s) => ({ a: String(s.a), b: String(s.b) })),
         }}
       />

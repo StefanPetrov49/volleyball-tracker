@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { matchResults } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
-import { parseResultForm, type ResultFormState } from "@/lib/result-input";
+import { parseResultForm, resultSaveError, type ResultFormState } from "@/lib/result-input";
 
 export async function createMatchResult(
   _prevState: ResultFormState,
@@ -16,8 +16,13 @@ export async function createMatchResult(
   const parsed = await parseResultForm(formData);
   if ("error" in parsed) return { error: parsed.error };
 
-  await db.insert(matchResults).values(parsed.data);
+  try {
+    await db.insert(matchResults).values(parsed.data);
+  } catch (e) {
+    return resultSaveError(e);
+  }
 
+  revalidatePath("/");
   revalidatePath("/results");
   redirect("/results");
 }

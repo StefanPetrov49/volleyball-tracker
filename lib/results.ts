@@ -19,6 +19,7 @@ const columns = {
   setsWonB: matchResults.setsWonB,
   sets: matchResults.sets,
   videoUrl: matchResults.videoUrl,
+  matchId: matchResults.matchId,
   playedAt: matchResults.playedAt,
   teamA: { name: teamA.name, logoUrl: teamA.logoUrl },
   teamB: { name: teamB.name, logoUrl: teamB.logoUrl },

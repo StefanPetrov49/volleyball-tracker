@@ -50,11 +50,8 @@ export default function NavUser() {
           <div className="nav-menu" role="menu">
             {isAdmin && (
               <>
-                <Link href="/admin/matches" className="nav-menu-item" role="menuitem" onClick={() => setMenuOpen(false)}>
-                  Добави Мач
-                </Link>
-                <Link href="/admin/users" className="nav-menu-item" role="menuitem" onClick={() => setMenuOpen(false)}>
-                  Нова парола
+                <Link href="/admin" className="nav-menu-item" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  Админ
                 </Link>
               </>
             )}

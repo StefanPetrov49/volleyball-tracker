@@ -4,6 +4,7 @@ import { db } from "../db";
 import { matches, matchResults, teams } from "../../db/schema";
 import type { Match, MatchResultSummary } from "../../types/match";
 import { MatchInput } from "../validation/match";
+import { matchStartMs } from "../datetime";
 
 /** Our team's slug in the teams table – used to know which side of a result is "us". */
 export const OUR_TEAM_SLUG = "yakite-pichove";
@@ -60,6 +61,18 @@ const toMatch = (r: Row): Match => ({
   home: r.home,
   result: toResult(r),
 });
+
+/**
+ * Splits matches for the admin list: upcoming (soonest first), then played (most recent first).
+ * Uses Sofia time; a match without a time counts as upcoming until the end of its day.
+ */
+export function splitUpcomingPast(list: Match[], now: number = Date.now()) {
+  const start = (m: Match) => matchStartMs(m.date, m.time);
+  return {
+    upcoming: list.filter((m) => start(m) >= now).sort((a, b) => start(a) - start(b)),
+    past: list.filter((m) => start(m) < now).sort((a, b) => start(b) - start(a)),
+  };
+}
 
 export async function getMatches(): Promise<Match[]> {
   const rows = await baseQuery().orderBy(asc(matches.date), asc(matches.time));

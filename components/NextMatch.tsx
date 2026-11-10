@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Match } from "@/types/match";
-import AddToCalendar from "./AddToCalendar";
 import HallLink from "./HallLink";
 import { matchStartMs, parseMatchDate } from "@/lib/datetime";
 
@@ -67,7 +66,6 @@ export default function NextMatch({ matches }: { matches: Match[] }) {
                     </div>
                 ))}
             </div>
-            <AddToCalendar match={next} variant="dark" />
         </div>
     );
 }
